@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vasiliy Katsyka // Portfolio Initializing...</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@500&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /*
+        Theme Configuration:
+        We use CSS variables to make theme switching easy.
+        The default is 'matrix'. Others are applied via a data-theme attribute on the body.
+        */
+        :root {
+            --bg-color: #0d0d0d;
+            --primary-color: #00ff41;
+            --text-color: #e0e0e0;
+            --card-color: rgba(20, 20, 20, 0.7);
+            --border-color: rgba(0, 255, 65, 0.2);
+            --shadow-color: rgba(0, 255, 65, 0.2);
+            --font-heading: 'Fira Code', monospace;
+            --font-body: 'Poppins', sans-serif;
+        }
+
+        body[data-theme="dracula"] {
+            --bg-color: #282a36;
+            --primary-color: #ff79c6;
+            --text-color: #f8f8f2;
+            --card-color: rgba(40, 42, 54, 0.7);
+            --border-color: rgba(255, 121, 198, 0.2);
+            --shadow-color: rgba(255, 121, 198, 0.2);
+        }
+
+        body[data-theme="nord"] {
+            --bg-color: #2e3440;
+            --primary-color: #88c0d0;
+            --text-color: #e5e9f0;
+            --card-color: rgba(59, 66, 82, 0.7);
+            --border-color: rgba(136, 192, 208, 0.2);
+            --shadow-color: rgba(136, 192, 208, 0.2);
+        }
+
+        /* --- General & Body Styling --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease;
+            cursor: default; 
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        section {
+            padding: 80px 0;
+        }
+        
+        h2, h3 {
+            font-family: var(--font-heading);
+            color: var(--primary-color);
+            text-shadow: 0 0 5px var(--shadow-color);
+        }
+        
+        h2 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        /* --- "Compiling" Loader --- */
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease-out;
+        }
+        .loader-content {
+            font-family: var(--font-heading);
+            color: #00ff41;
+            font-size: 1rem;
+            white-space: pre;
+            text-align: left;
+            padding: 20px;
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-family: var(--font-heading);
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            color: var(--text-color);
+            margin-bottom: 15px;
+        }
+
+        .hero .tagline {
+            font-size: 1.5rem;
+            color: var(--text-color);
+        }
+
+        .hero .tagline span {
+            color: var(--primary-color);
+        }
+
+        /* --- Project Grid & Cards --- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .card {
+            background: var(--card-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 30px;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 0 25px var(--shadow-color);
+            border-color: var(--primary-color);
+        }
+        
+        .card h3 { font-size: 1.4rem; margin-bottom: 15px; }
+        .card p { color: var(--text-color); flex-grow: 1; margin-bottom: 20px; }
+
+        /* --- Glitch Hover Effect --- */
+        .glitch-btn {
+            position: relative;
+            display: inline-block;
+            text-decoration: none;
+            background-color: var(--primary-color);
+            color: #000;
+            padding: 12px 20px;
+            border-radius: 5px;
+            font-weight: 600;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+        
+        .glitch-btn::before, .glitch-btn::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            overflow: hidden;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .glitch-btn:hover::before {
+            left: 2px;
+            text-shadow: -1px 0 var(--primary-color);
+            animation: glitch-anim-1 2s infinite linear alternate-reverse;
+        }
+        .glitch-btn:hover::after {
+            left: -2px;
+            text-shadow: -1px 0 var(--primary-color);
+            animation: glitch-anim-2 2s infinite linear alternate-reverse;
+        }
+        
+        @keyframes glitch-anim-1 {
+            0% { clip-path: inset(10% 0 80% 0); } 100% { clip-path: inset(40% 0 10% 0); }
+        }
+        @keyframes glitch-anim-2 {
+            0% { clip-path: inset(70% 0 5% 0); } 100% { clip-path: inset(5% 0 60% 0); }
+        }
+
+        /* --- Design Concepts --- */
+        .concept-card { padding: 0; }
+        .concept-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px 8px 0 0;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+        }
+        .concept-card p {
+            padding: 20px;
+            margin-bottom: 0;
+            font-weight: 600;
+            font-family: var(--font-heading);
+            flex-grow: 0;
+        }
+        
+        /* --- Footer --- */
+        .footer { text-align: center; padding-top: 60px; }
+        .footer .quote { font-style: italic; font-size: 0.9rem; color: #888; }
+        
+        /* --- Theme Switcher --- */
+        .theme-switcher {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+        .theme-switcher button {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid var(--text-color);
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        #theme-matrix { background-color: #00ff41; }
+        #theme-dracula { background-color: #ff79c6; }
+        #theme-nord { background-color: #88c0d0; }
+
+        /* --- Command Palette --- */
+        .command-palette {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 90%;
+            max-width: 500px;
+            background: var(--card-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+        .command-palette.visible {
+            transform: translate(-50%, -50%) scale(1);
+            visibility: visible;
+            opacity: 1;
+        }
+        .command-palette input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px;
+            font-size: 1rem;
+            color: var(--text-color);
+            font-family: var(--font-body);
+        }
+        .command-palette input:focus { outline: none; }
+        .command-palette ul { list-style: none; }
+        .command-palette li { padding: 10px 15px; cursor: pointer; }
+        .command-palette li:hover, .command-palette li.selected {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+        }
+        
+        /* --- Konami Code Canvas --- */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            display: none;
+        }
+        
+        /* --- Mobile Responsiveness --- */
+        @media (max-width: 768px) {
+            h2 {
+                font-size: 2rem; /* Make section titles smaller */
+            }
+
+            .grid {
+                /* This is the key change: forces 2 columns on mobile */
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px; /* Reduce the gap between smaller cards */
+            }
+
+            .card {
+                padding: 20px; /* Reduce padding for smaller cards */
+            }
+
+            .card h3 {
+                font-size: 1.1rem; /* Make card titles smaller */
+            }
+
+            .card p {
+                font-size: 0.9rem; /* Make card text slightly smaller */
+            }
+
+            .glitch-btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+
+            .concept-card p {
+                padding: 15px; /* Adjust padding for concept titles */
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body data-theme="matrix">
+
+    <!-- ASCII Art for "View Source" -->
+    <!--
+        Hey there, fellow developer! Thanks for checking out my code.
+        
+        __     __     ______     ______     ______   ______     ______     ______    
+       /\ \   /\ \   /\  ___\   /\  == \   /\__  _\ /\  ___\   /\  == \   /\  __ \   
+       \ \ \  \ \ \  \ \ \____  \ \  __<   \/_/\ \/ \ \  __\   \ \  __<   \ \ \/\ \  
+        \ \_\  \ \_\  \ \_____\  \ \_\ \_\    \ \_\  \ \_____\  \ \_\ \_\  \ \_____\ 
+         \/_/   \/_/   \/_____/   \/_/ /_/     \/_/   \/_____/   \/_/ /_/   \/_____/ 
+                                                                                   
+        Have a great day!
+    -->
+
+    <div id="loader-overlay" class="loader-overlay">
+        <div id="loader-content" class="loader-content"></div>
+    </div>
+    
+    <canvas id="matrix-canvas"></canvas>
+
+    <div id="command-palette" class="command-palette">
+        <input type="text" id="command-input" placeholder="Navigate...">
+        <ul id="command-results"></ul>
+    </div>
+
+    <div class="container">
+        <header class="hero">
+            <h1>Vasiliy Katsyka</h1>
+            <p class="tagline"><span>Developer</span> & <span>Designer</span></p>
+        </header>
+
+        <main>
+            <section id="projects">
+                <h2>// Telegram_Projects</h2>
+                <div class="grid">
+                    <div class="card"><h3>Lobster Coin</h3><p>A Telegram-based coin project with unique functionalities.</p><a href="https://t.me/lobster_coin_boot/lobstercoin" target="_blank" class="glitch-btn" data-text="View Project">View Project</a></div>
+                    <div class="card"><h3>Gift Upgrade Bot</h3><p>A demonstration bot for upgrading gift-related features.</p><a href="https://t.me/upgradeDemoBot" target="_blank" class="glitch-btn" data-text="View Project">View Project</a></div>
+                    <div class="card"><h3>Compact News</h3><p>An efficient and clean news channel on Telegram.</p><a href="https://t.me/CompactTelegram" target="_blank" class="glitch-btn" data-text="View Channel">View Channel</a></div>
+                    <div class="card"><h3>Gift Alerts Channel</h3><p>Real-time notifications and alerts for gift events.</p><a href="https://t.me/CompactAlerts" target="_blank" class="glitch-btn" data-text="View Channel">View Channel</a></div>
+                    <div class="card"><h3>Pusik Gifts Bot</h3><p>A specialized Telegram bot designed for Pusik Gifts.</p><a href="https://t.me/pusikGiftsBot" target="_blank" class="glitch-btn" data-text="View Project">View Project</a></div>
+                    <div class="card"><h3>Gift Concepts Channel</h3><p>A channel showcasing various gift design concepts.</p><a href="https://t.me/siix_design" target="_blank" class="glitch-btn" data-text="View Channel">View Channel</a></div>
+                    <div class="card"><h3>Floorprices Stickers</h3><p>A sticker pack displaying gift floor prices in a fun way.</p><a href="https://t.me/addstickers/PortalsFloors_5146625949_by_CompactFloorBot" target="_blank" class="glitch-btn" data-text="View Stickers">View Stickers</a></div>
+                </div>
+            </section>
+
+            <section id="concepts">
+                <h2>// Design_Concepts</h2>
+                <div id="concepts-grid" class="grid">
+                    <!-- Concepts will be dynamically loaded here by JavaScript -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer id="contact" class="footer">
+        <h2>// Contact_Me</h2>
+        <a href="https://t.me/Vasiliy939" target="_blank" class="glitch-btn" data-text="Telegram @Vasiliy939">Telegram @Vasiliy939</a>
+        <p style="margin-top: 30px;" class="quote">"Everything will be okay in the end. If it's not okay, it's not the end." - Ed Sheeran</p>
+    </footer>
+
+    <div class="theme-switcher">
+        <button id="theme-matrix" data-theme="matrix"></button>
+        <button id="theme-dracula" data-theme="dracula"></button>
+        <button id="theme-nord" data-theme="nord"></button>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const body = document.body;
+
+        // --- FEATURE 1: "COMPILING" LOADER ---
+        const loaderOverlay = document.getElementById('loader-overlay');
+        const loaderContent = document.getElementById('loader-content');
+        const loadingSteps = [
+            '> Initializing dependencies...',
+            '> Compiling assets...',
+            '> Fetching project data...',
+            '> Building DOM...',
+            '> Deployment complete.',
+            '> Welcome to my portfolio.'
+        ];
+        let step = 0;
+        const interval = setInterval(() => {
+            if (step < loadingSteps.length) {
+                loaderContent.innerHTML += (step > 0 ? '\n' : '') + loadingSteps[step];
+                step++;
+            } else {
+                clearInterval(interval);
+                setTimeout(() => {
+                    loaderOverlay.style.opacity = '0';
+                    setTimeout(() => loaderOverlay.style.display = 'none', 500);
+                }, 500);
+            }
+        }, 300);
+
+        // --- FEATURE 2: THEME SWITCHER ---
+        const themeSwitcher = document.querySelector('.theme-switcher');
+        const savedTheme = localStorage.getItem('portfolio-theme') || 'matrix';
+        body.setAttribute('data-theme', savedTheme);
+        themeSwitcher.addEventListener('click', e => {
+            if (e.target.tagName === 'BUTTON') {
+                const theme = e.target.getAttribute('data-theme');
+                body.setAttribute('data-theme', theme);
+                localStorage.setItem('portfolio-theme', theme);
+            }
+        });
+
+        // --- FEATURE 3: KONAMI CODE EASTER EGG ---
+        const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+        let konamiIndex = 0;
+        window.addEventListener('keydown', e => {
+            if (e.key === konamiCode[konamiIndex]) {
+                konamiIndex++;
+                if (konamiIndex === konamiCode.length) {
+                    konamiIndex = 0;
+                    showMatrixRain();
+                }
+            } else {
+                konamiIndex = 0;
+            }
+        });
+        
+        function showMatrixRain() {
+            const canvas = document.getElementById('matrix-canvas');
+            canvas.style.display = 'block';
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%';
+            const fontSize = 16;
+            const columns = canvas.width / fontSize;
+            const drops = Array(Math.floor(columns)).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = getComputedStyle(body).getPropertyValue('--primary-color');
+                ctx.font = fontSize + 'px arial';
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = letters[Math.floor(Math.random() * letters.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+            const rainInterval = setInterval(draw, 33);
+
+            setTimeout(() => {
+                clearInterval(rainInterval);
+                canvas.style.display = 'none';
+            }, 10000);
+        }
+
+        // --- FEATURE 4: COMMAND PALETTE ---
+        const palette = document.getElementById('command-palette');
+        const commandInput = document.getElementById('command-input');
+        const commandResults = document.getElementById('command-results');
+        const commands = [
+            { name: 'Go to Projects', action: () => document.getElementById('projects').scrollIntoView() },
+            { name: 'Go to Designs', action: () => document.getElementById('concepts').scrollIntoView() },
+            { name: 'Go to Contact', action: () => document.getElementById('contact').scrollIntoView() },
+            { name: 'Open Telegram', action: () => window.open('https://t.me/Vasiliy939', '_blank') }
+        ];
+
+        window.addEventListener('keydown', e => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                palette.classList.toggle('visible');
+                if (palette.classList.contains('visible')) {
+                    commandInput.focus();
+                    renderCommands('');
+                }
+            }
+            if (e.key === 'Escape' && palette.classList.contains('visible')) {
+                palette.classList.remove('visible');
+            }
+        });
+
+        commandInput.addEventListener('input', () => renderCommands(commandInput.value));
+        
+        function renderCommands(filter) {
+            commandResults.innerHTML = '';
+            const filtered = commands.filter(c => c.name.toLowerCase().includes(filter.toLowerCase()));
+            filtered.forEach((cmd, index) => {
+                const li = document.createElement('li');
+                li.textContent = cmd.name;
+                if (index === 0) li.classList.add('selected');
+                li.addEventListener('click', () => {
+                    cmd.action();
+                    palette.classList.remove('visible');
+                });
+                commandResults.appendChild(li);
+            });
+        }
+        
+        // --- DYNAMICALLY LOAD DESIGN CONCEPTS ---
+        const conceptsData = {
+            "Zombie Coffin": "zombie coffin black.png", "Adult mask": "adult mask.png", "Rubber Boots": "rubber boots.png", "Avatar Shirt": "avatar shirt.png", "Pepe Kulich": "pepe kulich black.png", "Chainsaw": "chainsawFull.png", "Inflatable Spider": "inflatable-spider.png", "18+ Pen": "18 pen.png", "Piggy": "piggy.png", "Cats Ramen": "cats.png", "Pusik Medal": "pusik medal.png", "Rice": "rice.png", "Minion": "minion.png", "Pou": "pou.png", "Fan": "fan.png"
+        };
+        const imageBaseUrl = 'https://raw.githubusercontent.com/Vasiliy-katsyka/Vasiliy/main/';
+        const conceptsGrid = document.getElementById('concepts-grid');
+        
+        for (const conceptName in conceptsData) {
+            const imageName = conceptsData[conceptName];
+            const encodedImageName = encodeURIComponent(imageName);
+            const imageUrl = `${imageBaseUrl}${encodedImageName}`;
+            const cardHTML = `
+                <div class="card concept-card">
+                    <img src="${imageUrl}" alt="${conceptName}" loading="lazy">
+                    <p>${conceptName}</p>
+                </div>
+            `;
+            conceptsGrid.innerHTML += cardHTML;
+        }
+    });
+    </script>
+</body>
+</html>
