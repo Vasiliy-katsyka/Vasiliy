@@ -8,11 +8,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@500&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /*
-        Theme Configuration:
-        We use CSS variables to make theme switching easy.
-        The default is 'matrix'. Others are applied via a data-theme attribute on the body.
-        */
         :root {
             --bg-color: #0d0d0d;
             --primary-color: #00ff41;
@@ -23,370 +18,220 @@
             --font-heading: 'Fira Code', monospace;
             --font-body: 'Poppins', sans-serif;
         }
+        body[data-theme="dracula"] { --bg-color: #282a36; --primary-color: #ff79c6; --text-color: #f8f8f2; --card-color: rgba(40, 42, 54, 0.7); --border-color: rgba(255, 121, 198, 0.2); --shadow-color: rgba(255, 121, 198, 0.2); }
+        body[data-theme="nord"] { --bg-color: #2e3440; --primary-color: #88c0d0; --text-color: #e5e9f0; --card-color: rgba(59, 66, 82, 0.7); --border-color: rgba(136, 192, 208, 0.2); --shadow-color: rgba(136, 192, 208, 0.2); }
 
-        body[data-theme="dracula"] {
-            --bg-color: #282a36;
-            --primary-color: #ff79c6;
-            --text-color: #f8f8f2;
-            --card-color: rgba(40, 42, 54, 0.7);
-            --border-color: rgba(255, 121, 198, 0.2);
-            --shadow-color: rgba(255, 121, 198, 0.2);
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: var(--font-body); background-color: var(--bg-color); color: var(--text-color); transition: background-color 0.3s ease; cursor: default; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 2; }
+        section { padding: 80px 0; }
+        h2, h3 { font-family: var(--font-heading); color: var(--primary-color); text-shadow: 0 0 5px var(--shadow-color); }
+        h2 { font-size: 2.5rem; text-align: center; margin-bottom: 50px; }
+        .hidden { display: none !important; }
 
-        body[data-theme="nord"] {
-            --bg-color: #2e3440;
-            --primary-color: #88c0d0;
-            --text-color: #e5e9f0;
-            --card-color: rgba(59, 66, 82, 0.7);
-            --border-color: rgba(136, 192, 208, 0.2);
-            --shadow-color: rgba(136, 192, 208, 0.2);
-        }
+        .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s ease-out; }
+        .loader-content { font-family: var(--font-heading); color: #00ff41; font-size: 1rem; white-space: pre; text-align: left; padding: 20px; }
 
-        /* --- General & Body Styling --- */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        .hero { min-height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .hero h1 { font-family: var(--font-heading); font-size: clamp(2.5rem, 8vw, 4rem); color: var(--text-color); margin-bottom: 15px; }
+        .hero .tagline { font-size: 1.5rem; color: var(--text-color); margin-bottom: 25px; }
+        .hero .tagline span { color: var(--primary-color); }
+        .lyric-slider { display: flex; align-items: center; justify-content: center; gap: 15px; width: 90%; max-width: 700px; }
+        .lyric-slider button { background: none; border: 1px solid var(--border-color); color: var(--primary-color); font-size: 1.5rem; cursor: pointer; width: 40px; height: 40px; border-radius: 50%; transition: all 0.2s; user-select: none; }
+        .lyric-slider button:hover { background-color: var(--primary-color); color: var(--bg-color); border-color: var(--primary-color); }
+        #hero-lyric { font-style: italic; color: #aaa; flex-grow: 1; }
 
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: var(--font-body);
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            transition: background-color 0.3s ease;
-            cursor: default; 
-        }
-        
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 20px;
-            position: relative;
-            z-index: 2;
-        }
-        
-        section {
-            padding: 80px 0;
-        }
-        
-        h2, h3 {
-            font-family: var(--font-heading);
-            color: var(--primary-color);
-            text-shadow: 0 0 5px var(--shadow-color);
-        }
-        
-        h2 {
-            font-size: 2.5rem;
-            text-align: center;
-            margin-bottom: 50px;
-        }
-
-        /* --- "Compiling" Loader --- */
-        .loader-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            z-index: 10000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.5s ease-out;
-        }
-        .loader-content {
-            font-family: var(--font-heading);
-            color: #00ff41;
-            font-size: 1rem;
-            white-space: pre;
-            text-align: left;
-            padding: 20px;
-        }
-
-        /* --- Hero Section --- */
-        .hero {
-            min-height: 80vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-
-        .hero h1 {
-            font-family: var(--font-heading);
-            font-size: clamp(2.5rem, 8vw, 4rem);
-            color: var(--text-color);
-            margin-bottom: 15px;
-        }
-
-        .hero .tagline {
-            font-size: 1.5rem;
-            color: var(--text-color);
-        }
-
-        .hero .tagline span {
-            color: var(--primary-color);
-        }
-
-        /* --- Project Grid & Cards --- */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-        
-        .card {
-            background: var(--card-color);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 30px;
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 0 25px var(--shadow-color);
-            border-color: var(--primary-color);
-        }
-        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .card { background: var(--card-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 30px; backdrop-filter: blur(5px); transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; display: flex; flex-direction: column; }
+        .card:hover { transform: translateY(-8px); box-shadow: 0 0 25px var(--shadow-color); border-color: var(--primary-color); }
         .card h3 { font-size: 1.4rem; margin-bottom: 15px; }
         .card p { color: var(--text-color); flex-grow: 1; margin-bottom: 20px; }
 
-        /* --- Glitch Hover Effect --- */
-        .glitch-btn {
-            position: relative;
-            display: inline-block;
-            text-decoration: none;
-            background-color: var(--primary-color);
-            color: #000;
-            padding: 12px 20px;
-            border-radius: 5px;
-            font-weight: 600;
-            text-align: center;
-            transition: background-color 0.3s ease;
-        }
-        
-        .glitch-btn::before, .glitch-btn::after {
-            content: attr(data-text);
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-color);
-            overflow: hidden;
-            color: var(--text-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .glitch-btn:hover::before {
-            left: 2px;
-            text-shadow: -1px 0 var(--primary-color);
-            animation: glitch-anim-1 2s infinite linear alternate-reverse;
-        }
-        .glitch-btn:hover::after {
-            left: -2px;
-            text-shadow: -1px 0 var(--primary-color);
-            animation: glitch-anim-2 2s infinite linear alternate-reverse;
-        }
-        
-        @keyframes glitch-anim-1 {
-            0% { clip-path: inset(10% 0 80% 0); } 100% { clip-path: inset(40% 0 10% 0); }
-        }
-        @keyframes glitch-anim-2 {
-            0% { clip-path: inset(70% 0 5% 0); } 100% { clip-path: inset(5% 0 60% 0); }
-        }
+        .glitch-btn { position: relative; display: inline-block; text-decoration: none; background-color: var(--primary-color); color: #000; padding: 12px 20px; border-radius: 5px; font-weight: 600; text-align: center; transition: background-color 0.3s ease; }
+        .glitch-btn::before, .glitch-btn::after { content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); overflow: hidden; color: var(--text-color); display: flex; align-items: center; justify-content: center; }
+        .glitch-btn:hover::before { left: 2px; text-shadow: -1px 0 var(--primary-color); animation: glitch-anim-1 2s infinite linear alternate-reverse; }
+        .glitch-btn:hover::after { left: -2px; text-shadow: -1px 0 var(--primary-color); animation: glitch-anim-2 2s infinite linear alternate-reverse; }
+        @keyframes glitch-anim-1 { 0% { clip-path: inset(10% 0 80% 0); } 100% { clip-path: inset(40% 0 10% 0); } }
+        @keyframes glitch-anim-2 { 0% { clip-path: inset(70% 0 5% 0); } 100% { clip-path: inset(5% 0 60% 0); } }
 
-        /* --- Design Concepts --- */
         .concept-card { padding: 0; }
-        .concept-card img {
+        .concept-card img { width: 100%; height: auto; display: block; border-radius: 8px 8px 0 0; aspect-ratio: 1 / 1; object-fit: cover; }
+        .concept-card p { padding: 20px; margin-bottom: 0; font-weight: 600; font-family: var(--font-heading); flex-grow: 0; }
+        
+        /* --- NEW TELEGRAM COLLECTION STYLES --- */
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* Always 3 columns */
+            gap: 15px;
+        }
+        .collection-grid img {
             width: 100%;
             height: auto;
             display: block;
-            border-radius: 8px 8px 0 0;
-            aspect-ratio: 1 / 1;
-            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s ease;
         }
-        .concept-card p {
-            padding: 20px;
-            margin-bottom: 0;
-            font-weight: 600;
-            font-family: var(--font-heading);
-            flex-grow: 0;
+        .collection-grid img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--shadow-color);
         }
         
-        /* --- Footer --- */
         .footer { text-align: center; padding-top: 60px; }
-        .footer .quote { font-style: italic; font-size: 0.9rem; color: #888; }
         
-        /* --- Theme Switcher --- */
-        .theme-switcher {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 100;
-        }
-        .theme-switcher button {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: 2px solid var(--text-color);
-            margin-left: 10px;
-            cursor: pointer;
-        }
+        .theme-switcher { position: fixed; bottom: 20px; right: 20px; z-index: 100; }
+        .theme-switcher button { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--text-color); margin-left: 10px; cursor: pointer; }
         #theme-matrix { background-color: #00ff41; }
         #theme-dracula { background-color: #ff79c6; }
         #theme-nord { background-color: #88c0d0; }
 
-        /* --- Command Palette --- */
-        .command-palette {
-            position: fixed;
-            top: 20%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
-            width: 90%;
-            max-width: 500px;
-            background: var(--card-color);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            backdrop-filter: blur(10px);
-            z-index: 9999;
-            visibility: hidden;
-            opacity: 0;
-            transition: all 0.2s ease;
-        }
-        .command-palette.visible {
-            transform: translate(-50%, -50%) scale(1);
-            visibility: visible;
-            opacity: 1;
-        }
-        .command-palette input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            border-bottom: 1px solid var(--border-color);
-            padding: 15px;
-            font-size: 1rem;
-            color: var(--text-color);
-            font-family: var(--font-body);
-        }
+        .command-palette { position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%) scale(0.9); width: 90%; max-width: 500px; background: var(--card-color); border: 1px solid var(--border-color); border-radius: 8px; backdrop-filter: blur(10px); z-index: 9999; visibility: hidden; opacity: 0; transition: all 0.2s ease; }
+        .command-palette.visible { transform: translate(-50%, -50%) scale(1); visibility: visible; opacity: 1; }
+        .command-palette input { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border-color); padding: 15px; font-size: 1rem; color: var(--text-color); font-family: var(--font-body); }
         .command-palette input:focus { outline: none; }
         .command-palette ul { list-style: none; }
         .command-palette li { padding: 10px 15px; cursor: pointer; }
-        .command-palette li:hover, .command-palette li.selected {
-            background-color: var(--primary-color);
-            color: var(--bg-color);
-        }
+        .command-palette li:hover, .command-palette li.selected { background-color: var(--primary-color); color: var(--bg-color); }
         
-        /* --- Konami Code Canvas --- */
-        #matrix-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            display: none;
-        }
+        #matrix-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; display: none; }
         
-        /* --- Mobile Responsiveness --- */
+        .game-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 10001; }
+        .game-container { background: #000; border: 2px solid var(--primary-color); box-shadow: 0 0 20px var(--shadow-color); padding: 15px; text-align: center; position: relative; }
+        .game-info { font-family: var(--font-heading); color: var(--text-color); margin-bottom: 10px; display: flex; justify-content: space-between; }
+        .close-game { position: absolute; top: 10px; right: 15px; background: none; border: none; color: white; font-size: 2rem; cursor: pointer; z-index: 10; }
+        .game-title { font-family: var(--font-heading); color: var(--primary-color); font-size: 1.5rem; margin-bottom: 15px; }
+        .game-launcher .game-selection { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .game-launcher button { background: var(--card-color); border: 1px solid var(--border-color); color: var(--text-color); padding: 15px; font-family: var(--font-heading); cursor: pointer; transition: all 0.2s; }
+        .game-launcher button:hover { background: var(--primary-color); color: var(--bg-color); }
+
+        #snake-canvas, #pong-canvas { background-color: #000; }
+        #snake-mobile-controls { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 5px; user-select: none; }
+        #snake-mobile-controls button { background: var(--card-color); border: 1px solid var(--border-color); color: var(--primary-color); font-size: 1.5rem; padding: 10px; }
+        #snake-up { grid-column: 2 / 3; } #snake-left { grid-row: 2 / 3; } #snake-down { grid-row: 2 / 3; } #snake-right { grid-row: 2 / 3; }
+        #game-over-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        #game-over-screen h3 { font-size: 3rem; text-shadow: 0 0 10px red; }
+        #game-over-screen button { margin-top: 20px; }
+        #tictactoe-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; width: 300px; height: 300px; }
+        .tictactoe-cell { width: 100%; height: 100%; background: var(--bg-color); border: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 3rem; font-family: var(--font-heading); cursor: pointer; }
+        #memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .memory-card { width: 70px; height: 70px; background-color: var(--card-color); border: 1px solid var(--border-color); cursor: pointer; perspective: 1000px; }
+        .memory-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }
+        .memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
+        .memory-card-front, .memory-card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; justify-content: center; align-items: center; font-size: 2rem; }
+        .memory-card-back { transform: rotateY(180deg); }
+        .clicker-container, .reaction-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; width: 300px; }
+        
         @media (max-width: 768px) {
-            h2 {
-                font-size: 2rem; /* Make section titles smaller */
-            }
-
-            .grid {
-                /* This is the key change: forces 2 columns on mobile */
-                grid-template-columns: repeat(2, 1fr);
-                gap: 15px; /* Reduce the gap between smaller cards */
-            }
-
-            .card {
-                padding: 20px; /* Reduce padding for smaller cards */
-            }
-
-            .card h3 {
-                font-size: 1.1rem; /* Make card titles smaller */
-            }
-
-            .card p {
-                font-size: 0.9rem; /* Make card text slightly smaller */
-            }
-
-            .glitch-btn {
-                padding: 10px 15px;
-                font-size: 0.9rem;
-            }
-
-            .concept-card p {
-                padding: 15px; /* Adjust padding for concept titles */
-                font-size: 1rem;
-            }
+            h2 { font-size: 2rem; }
+            .grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+            .card { padding: 20px; }
+            .card h3 { font-size: 1.1rem; }
+            .card p { font-size: 0.9rem; }
+            .glitch-btn { padding: 10px 15px; font-size: 0.9rem; }
+            .concept-card p { padding: 15px; font-size: 1rem; }
+            #snake-canvas, #pong-canvas, #tictactoe-board { width: 85vw; height: 85vw; max-width: 400px; max-height: 400px;}
         }
     </style>
 </head>
 <body data-theme="matrix">
 
-    <!-- ASCII Art for "View Source" -->
-    <!--
-        Hey there, fellow developer! Thanks for checking out my code.
-        
-        __     __     ______     ______     ______   ______     ______     ______    
-       /\ \   /\ \   /\  ___\   /\  == \   /\__  _\ /\  ___\   /\  == \   /\  __ \   
-       \ \ \  \ \ \  \ \ \____  \ \  __<   \/_/\ \/ \ \  __\   \ \  __<   \ \ \/\ \  
-        \ \_\  \ \_\  \ \_____\  \ \_\ \_\    \ \_\  \ \_____\  \ \_\ \_\  \ \_____\ 
-         \/_/   \/_/   \/_____/   \/_/ /_/     \/_/   \/_____/   \/_/ /_/   \/_____/ 
-                                                                                   
-        Have a great day!
-    -->
-
-    <div id="loader-overlay" class="loader-overlay">
-        <div id="loader-content" class="loader-content"></div>
-    </div>
-    
+    <div id="loader-overlay" class="loader-overlay"><div id="loader-content" class="loader-content"></div></div>
     <canvas id="matrix-canvas"></canvas>
-
     <div id="command-palette" class="command-palette">
-        <input type="text" id="command-input" placeholder="Navigate...">
-        <ul id="command-results"></ul>
+        <input type="text" id="command-input" placeholder="Navigate..."><ul id="command-results"></ul>
+    </div>
+
+    <!-- Game Modals -->
+    <div id="game-modal" class="game-modal">
+        <div id="game-launcher" class="game-container">
+            <h3 class="game-title">// Arcade</h3>
+            <div class="game-selection">
+                <button data-game="snake">Snake</button>
+                <button data-game="tictactoe">Tic-Tac-Toe</button>
+                <button data-game="pong">Pong</button>
+                <button data-game="memory">Memory Match</button>
+                <button data-game="clicker">Code Clicker</button>
+                <button data-game="reaction">Reaction Time</button>
+            </div>
+        </div>
+        <div id="snake-game" class="game-container hidden">
+            <div class="game-info"><span>SCORE: <span id="snake-score">0</span></span><span>Snake</span></div>
+            <canvas id="snake-canvas" width="400" height="400"></canvas>
+            <div id="snake-mobile-controls" class="hidden"><button id="snake-up">↑</button><button id="snake-left">←</button><button id="snake-down">↓</button><button id="snake-right">→</button></div>
+            <div id="game-over-screen" class="hidden"><h3>GAME OVER</h3><button id="restart-snake-btn" class="glitch-btn" data-text="Restart">Restart</button></div>
+        </div>
+        <div id="tictactoe-game" class="game-container hidden"><div class="game-info"><span>Turn: <span id="tictactoe-turn">X</span></span><span>Tic-Tac-Toe</span></div><div id="tictactoe-board"></div></div>
+        <div id="pong-game" class="game-container hidden"><div class="game-info"><span>Player: <span id="pong-player-score">0</span></span><span>CPU: <span id="pong-cpu-score">0</span></span></div><canvas id="pong-canvas" width="400" height="500"></canvas></div>
+        <div id="memory-game" class="game-container hidden"><div class="game-info"><span>Moves: <span id="memory-moves">0</span></span><span>Memory Match</span></div><div id="memory-grid"></div></div>
+        <div id="clicker-game" class="game-container hidden clicker-container"><h3 class="game-title">Code Clicker</h3><p>Lines of Code: <span id="clicker-score">0</span></p><button id="clicker-btn" class="glitch-btn" data-text="Compile()">Compile()</button></div>
+        <div id="reaction-game" class="game-container hidden reaction-container"><h3 class="game-title">Reaction Time</h3><p id="reaction-text">Click to start</p><button id="reaction-btn" class="glitch-btn" data-text="START">START</button></div>
+        <button id="close-game-btn" class="close-game">&times;</button>
     </div>
 
     <div class="container">
         <header class="hero">
             <h1>Vasiliy Katsyka</h1>
             <p class="tagline"><span>Developer</span> & <span>Designer</span></p>
+            <div class="lyric-slider">
+                <button id="prev-lyric">&lt;</button>
+                <span id="hero-lyric"></span>
+                <button id="next-lyric">&gt;</button>
+            </div>
         </header>
 
         <main>
             <section id="projects">
                 <h2>// Telegram_Projects</h2>
                 <div class="grid">
+                    <div class="card"><h3>Lobster Coin</h3><p>A Telegram-based coin project with unique functionalities.</p><a href="https://t.me/lobster_coin_boot/lobstercoin" target="_blank" class="glitch-btn" data-text="View Project">View Project</a></div>
                     <div class="card"><h3>Gift Upgrade Bot</h3><p>A demonstration bot for upgrading gift-related features.</p><a href="https://t.me/upgradeDemoBot" target="_blank" class="glitch-btn" data-text="View Project">View Project</a></div>
                     <div class="card"><h3>Compact News</h3><p>An efficient and clean news channel on Telegram.</p><a href="https://t.me/CompactTelegram" target="_blank" class="glitch-btn" data-text="View Channel">View Channel</a></div>
                     <div class="card"><h3>Gift Alerts Channel</h3><p>Real-time notifications and alerts for gift events.</p><a href="https://t.me/CompactAlerts" target="_blank" class="glitch-btn" data-text="View Channel">View Channel</a></div>
                     <div class="card"><h3>Pusik Gifts Bot</h3><p>A specialized Telegram bot designed for Pusik Gifts.</p><a href="https://t.me/pusikGiftsBot" target="_blank" class="glitch-btn" data-text="View Project">View Project</a></div>
                     <div class="card"><h3>Gift Concepts Channel</h3><p>A channel showcasing various gift design concepts.</p><a href="https://t.me/siix_design" target="_blank" class="glitch-btn" data-text="View Channel">View Channel</a></div>
-                    <div class="card"><h3>Floorprices Stickers</h3><p>A sticker pack displaying gift floor prices.</p><a href="https://t.me/addstickers/PortalsFloors_5146625949_by_CompactFloorBot" target="_blank" class="glitch-btn" data-text="View Stickers">View Stickers</a></div>
-                    <div class="card"><h3>Lobster Coin</h3><p>A Telegram-based coin project with unique functionalities.</p><a href="https://t.me/lobster_coin_bot/lobstercoin" target="_blank" class="glitch-btn" data-text="View Project">View Project</a></div>
+                    <div class="card"><h3>Floorprices Stickers</h3><p>A sticker pack displaying gift floor prices in a fun way.</p><a href="https://t.me/addstickers/PortalsFloors_5146625949_by_CompactFloorBot" target="_blank" class="glitch-btn" data-text="View Stickers">View Stickers</a></div>
                 </div>
             </section>
-
             <section id="concepts">
                 <h2>// Design_Concepts</h2>
-                <div id="concepts-grid" class="grid">
-                    <!-- Concepts will be dynamically loaded here by JavaScript -->
+                <div id="concepts-grid" class="grid"></div>
+            </section>
+            
+            <!-- NEW TELEGRAM COLLECTION SECTION -->
+            <section id="collection">
+                <h2>// My_Telegram_Collection</h2>
+                <div class="collection-grid">
+                    <img src="https://nft.fragment.com/gift/bunnymuffin-24641.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/xmasstocking-57910.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/jinglebells-6475.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/lolpop-225588.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/jesterhat-46844.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/lolpop-291115.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/snoopdogg-141522.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/voodoodoll-7759.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/snoopdogg-513533.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/faithamulet-20638.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/lolpop-123366.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/faithamulet-31237.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/instantramen-88414.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/recordplayer-9412.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/instantramen-88557.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/happybrownie-7438.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/happybrownie-74717.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/happybrownie-65429.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/lunarsnake-9489.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/jollychimp-46102.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/lunarsnake-136807.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/candycane-151285.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/holidaydrink-16107.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/candycane-112302.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/whipcupcake-19457.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/whipcupcake-18607.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/whipcupcake-27253.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/cookieheart-40741.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/snakebox-292.large.jpg" alt="Telegram Collection Item" loading="lazy">
+                    <img src="https://nft.fragment.com/gift/cookieheart-34112.large.jpg" alt="Telegram Collection Item" loading="lazy">
                 </div>
             </section>
         </main>
@@ -395,7 +240,6 @@
     <footer id="contact" class="footer">
         <h2>// Contact_Me</h2>
         <a href="https://t.me/Vasiliy939" target="_blank" class="glitch-btn" data-text="Telegram @Vasiliy939">Telegram @Vasiliy939</a>
-        <p style="margin-top: 30px;" class="quote">"Everything will be okay in the end. If it's not okay, it's not the end." - Ed Sheeran</p>
     </footer>
 
     <div class="theme-switcher">
@@ -404,160 +248,100 @@
         <button id="theme-nord" data-theme="nord"></button>
     </div>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const body = document.body;
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const body = document.body;
 
-        // --- FEATURE 1: "COMPILING" LOADER ---
-        const loaderOverlay = document.getElementById('loader-overlay');
-        const loaderContent = document.getElementById('loader-content');
-        const loadingSteps = [
-            '> Initializing dependencies...',
-            '> Compiling assets...',
-            '> Fetching project data...',
-            '> Building DOM...',
-            '> Deployment complete.',
-            '> Welcome to my portfolio.'
-        ];
-        let step = 0;
-        const interval = setInterval(() => {
-            if (step < loadingSteps.length) {
-                loaderContent.innerHTML += (step > 0 ? '\n' : '') + loadingSteps[step];
-                step++;
-            } else {
-                clearInterval(interval);
-                setTimeout(() => {
-                    loaderOverlay.style.opacity = '0';
-                    setTimeout(() => loaderOverlay.style.display = 'none', 500);
-                }, 500);
-            }
-        }, 300);
+    // --- LYRIC SLIDER ---
+    const edSheeranLyrics = [
+        "This love is a blaze.", "And, darling, I will be loving you 'til we're 70.", "The club isn't the best place to find a lover.", "I'll pick you up when you're getting down.",
+        "I'll pick your feet up off of the ground and never ever let you down.", "This feels like falling in love.", "You are my one and only.", "I'm in love with the shape of you.", "Yeah you look happier, you do.",
+        "I wanna be that guy/ I wanna kiss your eyes/ I wanna drink that smile, I wanna feel like my soul's on fire.", "Don't care what the DJ chooses. Get lost in the rhythm of me.", "I wanna be drunk when I wake up.",
+        "And tomorrow's a brand new day", "You know that I've got whisky with white lies, and smoke in my lungs.", "I chased the picture perfect life, I think they painted it wrong", "I could live, I could die hanging on the words you say",
+        "I can still feel the butterflies from when we stumbled home that night.", "I can't wait to make a million more first times.", "We'll never fade like graffiti on the overpass.", "Love can change the world in a moment",
+        "Love flows deeper than the river every moment that I spend with you", "A heart that's broke is a heart that's been loved", "When you and I collide, you bring me to life.", "Good night and joy be with you all.",
+        "The hurry and the noise shut out/ Just stay here and be right now.", "A man may drink and not be drunk.", "This love is a blaze.", "Now I'll surrender up my heart and swap it for yours.", "We drink the best lager.",
+        "Would it hurt your reputation if I put it on wax?", "I woke up, wiped the sleep out of my eyes.", "We keep this love in a photograph.", "Without you to hold I'll be freezing.", "I'm falling for your eyes, but they don't know me yet.",
+        "And it's been a while but I still feel the same.", "Vividly need to let my liver be.", "Baby, let's slow down time/ Maybe just press rewind.", "Loving can mend your soul.", "We can all be loved the way that God made us.",
+        "You got a friend in me.", "Stuck in her daydream.", "Love in slow motion.", "Pain is only relevant if it still hurts.", "Been this way since eighteen.", "And you will never know just how beautiful you are to me.",
+        "That heart is so cold.", "Go ahead and just live it up.", "Times forever frozen still.", "You'll never know the weight of my heart every time I leave you, babe.", "Even at the times I'm miles away, you are always on my mind.",
+        "I got sinning on my mind.", "Do you ever wonder if the stars shine out for you?", "My mind is a warrior.", "And I'll say it again living life on the edge with a close handful of friends.", "Forever and now, I will be by your side.",
+        "We've shared a toothbrush and shared our home.", "All my troubles turn to nothing when I'm in your eyes.", "So turn off the world and the telephone.", "None of us are saints I guess that god knows that.",
+        "I'm not you, now that would be disastrous.", "Every teardrop, every wrong turn / Made the moment we found.", "Just promise me, you'll always be a friend.", "I will always love you for what it's worth."
+    ];
+    const lyricElement = document.getElementById('hero-lyric');
+    const prevLyricBtn = document.getElementById('prev-lyric');
+    const nextLyricBtn = document.getElementById('next-lyric');
+    let currentLyricIndex = Math.floor(Math.random() * edSheeranLyrics.length);
+    
+    function updateLyric() { lyricElement.textContent = `"${edSheeranLyrics[currentLyricIndex]}"`; }
+    prevLyricBtn.addEventListener('click', () => { currentLyricIndex = (currentLyricIndex - 1 + edSheeranLyrics.length) % edSheeranLyrics.length; updateLyric(); });
+    nextLyricBtn.addEventListener('click', () => { currentLyricIndex = (currentLyricIndex + 1) % edSheeranLyrics.length; updateLyric(); });
+    updateLyric();
+    
+    // --- Loader, Theme Switcher, Konami Code, Command Palette (Code is unchanged) ---
+    const loaderOverlay = document.getElementById('loader-overlay'), loaderContent = document.getElementById('loader-content');
+    const loadingSteps = ['> Initializing dependencies...','> Compiling assets...','> Fetching project data...','> Building DOM...','> Deployment complete.','> Welcome to my portfolio.'];
+    let step = 0;
+    const interval = setInterval(()=>{if(step<loadingSteps.length){loaderContent.innerHTML+=(step>0?'\n':'')+loadingSteps[step];step++;}else{clearInterval(interval);setTimeout(()=>{loaderOverlay.style.opacity='0';setTimeout(()=>loaderOverlay.style.display='none',500);},500);}},300);
+    const themeSwitcher=document.querySelector('.theme-switcher'),savedTheme=localStorage.getItem('portfolio-theme')||'matrix';body.setAttribute('data-theme',savedTheme);themeSwitcher.addEventListener('click',e=>{if(e.target.tagName==='BUTTON'){const t=e.target.getAttribute('data-theme');body.setAttribute('data-theme',t);localStorage.setItem('portfolio-theme',t);}});
+    const konamiCode=['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];let konamiIndex=0;window.addEventListener('keydown',e=>{e.key===konamiCode[konamiIndex]?(konamiIndex++,konamiIndex===konamiCode.length&&(konamiIndex=0,showMatrixRain())):konamiIndex=0;});function showMatrixRain(){const e=document.getElementById('matrix-canvas');e.style.display='block';const t=e.getContext('2d');e.width=window.innerWidth,e.height=window.innerHeight;const o='ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%',n=16,a=e.width/n,i=Array(Math.floor(a)).fill(1);function d(){t.fillStyle='rgba(0, 0, 0, 0.05)',t.fillRect(0,0,e.width,e.height),t.fillStyle=getComputedStyle(body).getPropertyValue('--primary-color'),t.font=n+'px arial';for(let e=0;e<i.length;e++){const a=o[Math.floor(Math.random()*o.length)];t.fillText(a,e*n,i[e]*n),i[e]*n>e.height&&Math.random()>.975&&(i[e]=0),i[e]++}}const l=setInterval(d,33);setTimeout(()=>{clearInterval(l),e.style.display='none'},10e3);}
+    const palette=document.getElementById('command-palette'),commandInput=document.getElementById('command-input'),commandResults=document.getElementById('command-results');
+    const commands=[{name:'Go to Projects',action:()=>document.getElementById('projects').scrollIntoView()},{name:'Go to Designs',action:()=>document.getElementById('concepts').scrollIntoView()},{name:'Go to Collection',action:()=>document.getElementById('collection').scrollIntoView()},{name:'Go to Contact',action:()=>document.getElementById('contact').scrollIntoView()},{name:'Open Game Launcher',action:()=>openGameLauncher()}];
+    window.addEventListener('keydown',e=>{(e.ctrlKey||e.metaKey)&&'k'===e.key&&(e.preventDefault(),palette.classList.toggle('visible'),palette.classList.contains('visible')&&(commandInput.focus(),renderCommands(''))),'Escape'===e.key&&palette.classList.contains('visible')&&palette.classList.remove('visible');});commandInput.addEventListener('input',()=>renderCommands(commandInput.value));function renderCommands(e){commandResults.innerHTML='';const t=commands.filter(t=>t.name.toLowerCase().includes(e.toLowerCase()));t.forEach((e,o)=>{const n=document.createElement('li');n.textContent=e.name,0===o&&n.classList.add('selected'),n.addEventListener('click',()=>{e.action(),palette.classList.remove('visible');}),commandResults.appendChild(n);});}
 
-        // --- FEATURE 2: THEME SWITCHER ---
-        const themeSwitcher = document.querySelector('.theme-switcher');
-        const savedTheme = localStorage.getItem('portfolio-theme') || 'matrix';
-        body.setAttribute('data-theme', savedTheme);
-        themeSwitcher.addEventListener('click', e => {
-            if (e.target.tagName === 'BUTTON') {
-                const theme = e.target.getAttribute('data-theme');
-                body.setAttribute('data-theme', theme);
-                localStorage.setItem('portfolio-theme', theme);
-            }
-        });
+    // --- GAME ARCADE LOGIC ---
+    const gameModal = document.getElementById('game-modal');
+    const closeGameBtn = document.getElementById('close-game-btn');
+    const gameLauncher = document.getElementById('game-launcher');
+    const allGameContainers = document.querySelectorAll('.game-container');
+    function openGameLauncher() { gameModal.style.display = 'flex'; allGameContainers.forEach(c => c.classList.add('hidden')); gameLauncher.classList.remove('hidden'); }
+    function showGame(gameId) {
+        allGameContainers.forEach(c => c.classList.add('hidden'));
+        document.getElementById(gameId + '-game').classList.remove('hidden');
+        if (window['init' + gameId.charAt(0).toUpperCase() + gameId.slice(1)]) { window['init' + gameId.charAt(0).toUpperCase() + gameId.slice(1)](); }
+    }
+    gameLauncher.addEventListener('click', (e) => { if (e.target.tagName === 'BUTTON' && e.target.dataset.game) { showGame(e.target.dataset.game); } });
+    closeGameBtn.addEventListener('click', () => { gameModal.style.display = 'none'; if (snakeGame.interval) clearInterval(snakeGame.interval); if (pongGame.interval) clearInterval(pongGame.interval); });
+    
+    // --- Snake Game ---
+    const snakeElements = { canvas: document.getElementById('snake-canvas'), scoreEl: document.getElementById('snake-score'), gameOverScreen: document.getElementById('game-over-screen'), restartBtn: document.getElementById('restart-snake-btn'), mobileControls: document.getElementById('snake-mobile-controls'), };
+    const snakeGame = { gridSize: 20 };
+    function initSnake() {
+        const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        snakeElements.mobileControls.classList.toggle('hidden', !isMobile);
+        snakeElements.gameOverScreen.classList.add('hidden'); snakeGame.snake = [{ x: 10, y: 10 }]; snakeGame.direction = 'right'; snakeGame.score = 0; snakeElements.scoreEl.textContent = 0; placeSnakeFood();
+        if (snakeGame.interval) clearInterval(snakeGame.interval); snakeGame.interval = setInterval(updateSnake, 150);
+        window.addEventListener('keydown', changeSnakeDirection);
+    }
+    function placeSnakeFood() { snakeGame.food = { x: Math.floor(Math.random() * (snakeElements.canvas.width / snakeGame.gridSize)), y: Math.floor(Math.random() * (snakeElements.canvas.height / snakeGame.gridSize)) }; }
+    function updateSnake() { const head = { ...snakeGame.snake[0] }; if (snakeGame.direction === 'right') head.x++; if (snakeGame.direction === 'left') head.x--; if (snakeGame.direction === 'up') head.y--; if (snakeGame.direction === 'down') head.y++; if (head.x < 0 || head.x * snakeGame.gridSize >= snakeElements.canvas.width || head.y < 0 || head.y * snakeGame.gridSize >= snakeElements.canvas.height) return gameOverSnake(); snakeGame.snake.unshift(head); for (let i = 1; i < snakeGame.snake.length; i++) { if (head.x === snakeGame.snake[i].x && head.y === snakeGame.snake[i].y) return gameOverSnake(); } if (head.x === snakeGame.food.x && head.y === snakeGame.food.y) { snakeGame.score++; snakeElements.scoreEl.textContent = snakeGame.score; placeSnakeFood(); } else { snakeGame.snake.pop(); } drawSnake(); }
+    function drawSnake() { const ctx = snakeElements.canvas.getContext('2d'); ctx.clearRect(0, 0, snakeElements.canvas.width, snakeElements.canvas.height); ctx.fillStyle = getComputedStyle(body).getPropertyValue('--primary-color'); snakeGame.snake.forEach(s => ctx.fillRect(s.x * snakeGame.gridSize, s.y * snakeGame.gridSize, snakeGame.gridSize, snakeGame.gridSize)); ctx.fillStyle = '#ff0000'; ctx.fillRect(snakeGame.food.x * snakeGame.gridSize, snakeGame.food.y * snakeGame.gridSize, snakeGame.gridSize, snakeGame.gridSize); }
+    function gameOverSnake() { clearInterval(snakeGame.interval); snakeGame.interval = null; snakeElements.gameOverScreen.classList.remove('hidden'); window.removeEventListener('keydown', changeSnakeDirection); }
+    function changeSnakeDirection(e) { const key = e.key; if ((key === 'ArrowUp' || key === 'w') && snakeGame.direction !== 'down') snakeGame.direction = 'up'; if ((key === 'ArrowDown' || key === 's') && snakeGame.direction !== 'up') snakeGame.direction = 'down'; if ((key === 'ArrowLeft' || key === 'a') && snakeGame.direction !== 'right') snakeGame.direction = 'left'; if ((key === 'ArrowRight' || key === 'd') && snakeGame.direction !== 'left') snakeGame.direction = 'right'; }
+    snakeElements.restartBtn.addEventListener('click', initSnake);
+    snakeElements.mobileControls.addEventListener('click', (e) => { const dir = e.target.id.replace('snake-', ''); if (dir === 'up' && snakeGame.direction !== 'down') snakeGame.direction = 'up'; if (dir === 'down' && snakeGame.direction !== 'up') snakeGame.direction = 'down'; if (dir === 'left' && snakeGame.direction !== 'right') snakeGame.direction = 'left'; if (dir === 'right' && snakeGame.direction !== 'left') snakeGame.direction = 'right'; });
 
-        // --- FEATURE 3: KONAMI CODE EASTER EGG ---
-        const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
-        let konamiIndex = 0;
-        window.addEventListener('keydown', e => {
-            if (e.key === konamiCode[konamiIndex]) {
-                konamiIndex++;
-                if (konamiIndex === konamiCode.length) {
-                    konamiIndex = 0;
-                    showMatrixRain();
-                }
-            } else {
-                konamiIndex = 0;
-            }
-        });
-        
-        function showMatrixRain() {
-            const canvas = document.getElementById('matrix-canvas');
-            canvas.style.display = 'block';
-            const ctx = canvas.getContext('2d');
+    // --- Tic-Tac-Toe ---
+    const tttBoard = document.getElementById('tictactoe-board'), tttTurn = document.getElementById('tictactoe-turn');
+    let tttState = {}; function initTictactoe() { tttState = { currentPlayer: 'X', board: Array(9).fill(null), active: true }; tttBoard.innerHTML = ''; for (let i = 0; i < 9; i++) { const cell = document.createElement('div'); cell.classList.add('tictactoe-cell'); cell.dataset.index = i; cell.addEventListener('click', handleTttClick); tttBoard.appendChild(cell); } tttTurn.textContent = 'X'; } function handleTttClick(e) { const index = e.target.dataset.index; if (tttState.board[index] || !tttState.active) return; tttState.board[index] = tttState.currentPlayer; e.target.textContent = tttState.currentPlayer; if (checkTttWin()) { tttTurn.textContent = `${tttState.currentPlayer} wins!`; tttState.active = false; } else if (tttState.board.every(cell => cell)) { tttTurn.textContent = `It's a draw!`; tttState.active = false; } else { tttState.currentPlayer = tttState.currentPlayer === 'X' ? 'O' : 'X'; tttTurn.textContent = tttState.currentPlayer; } } function checkTttWin() { const lines = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]]; return lines.some(line => line.every(index => tttState.board[index] === tttState.currentPlayer)); }
 
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+    // --- Pong ---
+    const pongCanvas = document.getElementById('pong-canvas'), pongCtx = pongCanvas.getContext('2d'), pongPlayerScoreEl = document.getElementById('pong-player-score'), pongCpuScoreEl = document.getElementById('pong-cpu-score');
+    const pongGame = { paddleHeight: 80, paddleWidth: 10, ballRadius: 8 }; function initPong() { pongGame.player = { y: pongCanvas.height / 2 - pongGame.paddleHeight / 2, score: 0 }; pongGame.cpu = { y: pongCanvas.height / 2 - pongGame.paddleHeight / 2, score: 0 }; resetPongBall(); updatePongScores(); if (pongGame.interval) clearInterval(pongGame.interval); pongGame.interval = setInterval(updatePong, 1000 / 60); pongCanvas.addEventListener('mousemove', movePongPaddle); pongCanvas.addEventListener('touchmove', movePongPaddle, { passive: true }); } function resetPongBall() { pongGame.ball = { x: pongCanvas.width / 2, y: pongCanvas.height / 2, dx: 5, dy: 5 }; } function updatePongScores() { pongPlayerScoreEl.textContent = pongGame.player.score; pongCpuScoreEl.textContent = pongGame.cpu.score; } function movePongPaddle(e) { const rect = pongCanvas.getBoundingClientRect(); const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY; pongGame.player.y = clientY - rect.top - pongGame.paddleHeight / 2; } function updatePong() { pongCtx.clearRect(0, 0, pongCanvas.width, pongCanvas.height); pongCtx.fillStyle = getComputedStyle(body).getPropertyValue('--primary-color'); pongCtx.fillRect(0, pongGame.player.y, pongGame.paddleWidth, pongGame.paddleHeight); pongCtx.fillRect(pongCanvas.width - pongGame.paddleWidth, pongGame.cpu.y, pongGame.paddleWidth, pongGame.paddleHeight); pongCtx.beginPath(); pongCtx.arc(pongGame.ball.x, pongGame.ball.y, pongGame.ballRadius, 0, Math.PI * 2); pongCtx.fill(); pongGame.ball.x += pongGame.ball.dx; pongGame.ball.y += pongGame.ball.dy; pongGame.cpu.y += (pongGame.ball.y - (pongGame.cpu.y + pongGame.paddleHeight / 2)) * 0.1; if (pongGame.ball.y + pongGame.ballRadius > pongCanvas.height || pongGame.ball.y - pongGame.ballRadius < 0) pongGame.ball.dy *= -1; if (pongGame.ball.x - pongGame.ballRadius < pongGame.paddleWidth && pongGame.ball.y > pongGame.player.y && pongGame.ball.y < pongGame.player.y + pongGame.paddleHeight) pongGame.ball.dx *= -1; if (pongGame.ball.x + pongGame.ballRadius > pongCanvas.width - pongGame.paddleWidth && pongGame.ball.y > pongGame.cpu.y && pongGame.ball.y < pongGame.cpu.y + pongGame.paddleHeight) pongGame.ball.dx *= -1; if (pongGame.ball.x < 0) { pongGame.cpu.score++; resetPongBall(); updatePongScores(); } if (pongGame.ball.x > pongCanvas.width) { pongGame.player.score++; resetPongBall(); updatePongScores(); } }
+    
+    // --- Memory Game ---
+    const memoryGrid = document.getElementById('memory-grid'), memoryMovesEl = document.getElementById('memory-moves'); const memoryIcons = ['💻','📱','💾','💿','💡','⚙️','🚀','📡']; let memoryState = {}; function initMemory() { memoryState = { moves: 0, flippedCards: [], matchedPairs: 0 }; memoryMovesEl.textContent = 0; const cards = [...memoryIcons, ...memoryIcons].sort(() => 0.5 - Math.random()); memoryGrid.innerHTML = ''; cards.forEach(icon => { const card = document.createElement('div'); card.classList.add('memory-card'); card.dataset.icon = icon; card.innerHTML = `<div class="memory-card-inner"><div class="memory-card-front"></div><div class="memory-card-back">${icon}</div></div>`; card.addEventListener('click', () => handleMemoryClick(card)); memoryGrid.appendChild(card); }); } function handleMemoryClick(card) { if (card.classList.contains('flipped') || memoryState.flippedCards.length === 2) return; card.classList.add('flipped'); memoryState.flippedCards.push(card); if (memoryState.flippedCards.length === 2) { memoryState.moves++; memoryMovesEl.textContent = memoryState.moves; const [card1, card2] = memoryState.flippedCards; if (card1.dataset.icon === card2.dataset.icon) { memoryState.matchedPairs++; memoryState.flippedCards = []; } else { setTimeout(() => { card1.classList.remove('flipped'); card2.classList.remove('flipped'); memoryState.flippedCards = []; }, 1000); } } }
+    
+    // --- Code Clicker & Reaction Time ---
+    function initClicker() { document.getElementById('clicker-score').textContent = 0; document.getElementById('clicker-btn').onclick = () => { const scoreEl = document.getElementById('clicker-score'); scoreEl.textContent = parseInt(scoreEl.textContent) + 1; }; } function initReaction() { const textEl = document.getElementById('reaction-text'); const btn = document.getElementById('reaction-btn'); let startTime, timeout; btn.onclick = () => { if(btn.dataset.state === 'waiting') { clearTimeout(timeout); textEl.textContent = 'Too soon!'; btn.dataset.state = 'idle'; btn.textContent = 'Restart'; } else if (btn.dataset.state === 'ready') { const reactionTime = Date.now() - startTime; textEl.textContent = `Your time: ${reactionTime}ms`; btn.dataset.state = 'idle'; btn.textContent = 'Restart'; } else { textEl.textContent = '...Wait for it...'; btn.dataset.state = 'waiting'; timeout = setTimeout(() => { textEl.textContent = 'CLICK NOW!'; btn.dataset.state = 'ready'; startTime = Date.now(); }, Math.random() * 3000 + 1000); } }; }
 
-            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%';
-            const fontSize = 16;
-            const columns = canvas.width / fontSize;
-            const drops = Array(Math.floor(columns)).fill(1);
-
-            function draw() {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = getComputedStyle(body).getPropertyValue('--primary-color');
-                ctx.font = fontSize + 'px arial';
-
-                for (let i = 0; i < drops.length; i++) {
-                    const text = letters[Math.floor(Math.random() * letters.length)];
-                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                        drops[i] = 0;
-                    }
-                    drops[i]++;
-                }
-            }
-            const rainInterval = setInterval(draw, 33);
-
-            setTimeout(() => {
-                clearInterval(rainInterval);
-                canvas.style.display = 'none';
-            }, 10000);
-        }
-
-        // --- FEATURE 4: COMMAND PALETTE ---
-        const palette = document.getElementById('command-palette');
-        const commandInput = document.getElementById('command-input');
-        const commandResults = document.getElementById('command-results');
-        const commands = [
-            { name: 'Go to Projects', action: () => document.getElementById('projects').scrollIntoView() },
-            { name: 'Go to Designs', action: () => document.getElementById('concepts').scrollIntoView() },
-            { name: 'Go to Contact', action: () => document.getElementById('contact').scrollIntoView() },
-            { name: 'Open Telegram', action: () => window.open('https://t.me/Vasiliy939', '_blank') }
-        ];
-
-        window.addEventListener('keydown', e => {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-                e.preventDefault();
-                palette.classList.toggle('visible');
-                if (palette.classList.contains('visible')) {
-                    commandInput.focus();
-                    renderCommands('');
-                }
-            }
-            if (e.key === 'Escape' && palette.classList.contains('visible')) {
-                palette.classList.remove('visible');
-            }
-        });
-
-        commandInput.addEventListener('input', () => renderCommands(commandInput.value));
-        
-        function renderCommands(filter) {
-            commandResults.innerHTML = '';
-            const filtered = commands.filter(c => c.name.toLowerCase().includes(filter.toLowerCase()));
-            filtered.forEach((cmd, index) => {
-                const li = document.createElement('li');
-                li.textContent = cmd.name;
-                if (index === 0) li.classList.add('selected');
-                li.addEventListener('click', () => {
-                    cmd.action();
-                    palette.classList.remove('visible');
-                });
-                commandResults.appendChild(li);
-            });
-        }
-        
-        // --- DYNAMICALLY LOAD DESIGN CONCEPTS ---
-        const conceptsData = {
-            "Zombie Coffin": "zombie coffin black.png", "Adult mask": "adult mask.png", "Rubber Boots": "rubber boots.png", "Avatar Shirt": "avatar shirt.png", "Pepe Kulich": "pepe kulich black.png", "Chainsaw": "chainsawFull.png", "Inflatable Spider": "inflatable-spider.png", "18+ Pen": "18 pen.png", "Piggy": "piggy.png", "Cats Ramen": "cats.png", "Pusik Medal": "pusik medal.png", "Rice": "rice.png", "Minion": "minion.png", "Pou": "pou.png", "Fan": "fan.png"
-        };
-        const imageBaseUrl = 'https://raw.githubusercontent.com/Vasiliy-katsyka/Vasiliy/main/';
-        const conceptsGrid = document.getElementById('concepts-grid');
-        
-        for (const conceptName in conceptsData) {
-            const imageName = conceptsData[conceptName];
-            const encodedImageName = encodeURIComponent(imageName);
-            const imageUrl = `${imageBaseUrl}${encodedImageName}`;
-            const cardHTML = `
-                <div class="card concept-card">
-                    <img src="${imageUrl}" alt="${conceptName}" loading="lazy">
-                    <p>${conceptName}</p>
-                </div>
-            `;
-            conceptsGrid.innerHTML += cardHTML;
-        }
-    });
-    </script>
+    // --- Dynamic Concepts Grid ---
+    const conceptsData={"Zombie Coffin":"zombie coffin black.png","Adult mask":"adult mask.png","Rubber Boots":"rubber boots.png","Avatar Shirt":"avatar shirt.png","Pepe Kulich":"pepe kulich black.png","Chainsaw":"chainsawFull.png","Inflatable Spider":"inflatable-spider.png","18+ Pen":"18 pen.png","Piggy":"piggy.png","Cats Ramen":"cats.png","Pusik Medal":"pusik medal.png","Rice":"rice.png","Minion":"minion.png","Pou":"pou.png","Fan":"fan.png"};
+    const imageBaseUrl='https://raw.githubusercontent.com/Vasiliy-katsyka/Vasiliy/main/';
+    const conceptsGrid=document.getElementById('concepts-grid');
+    for(const e in conceptsData){const t=conceptsData[e],o=encodeURIComponent(t),n=`${imageBaseUrl}${o}`,a=`\n <div class="card concept-card">\n <img src="${n}" alt="${e}" loading="lazy">\n <p>${e}</p>\n </div>\n `;conceptsGrid.innerHTML+=a;}
+});
+</script>
 </body>
 </html>
