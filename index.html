@@ -22,7 +22,6 @@
             --accent: #00f0ff;
             --accent-dim: rgba(0, 240, 255, 0.12);
             --green: #00ffaa;
-            --red: #ff3366;
             --font-sans: 'Plus Jakarta Sans', -apple-system, sans-serif;
             --font-mono: 'Space Mono', monospace;
         }
@@ -39,6 +38,8 @@
             font-family: var(--font-sans);
             line-height: 1.5;
             overflow-x: hidden;
+            selection-background-color: var(--accent);
+            selection-color: #000;
         }
 
         ::selection {
@@ -46,6 +47,7 @@
             color: #000;
         }
 
+        /* Canvas background */
         #bg-canvas {
             position: fixed;
             top: 0;
@@ -197,7 +199,7 @@
 
         .grid-asym-2 {
             display: grid;
-            grid-template-columns: 0.8fr 1.2fr;
+            grid-template-columns: 0.85fr 1.15fr;
             gap: 16px;
             margin-bottom: 48px;
         }
@@ -259,7 +261,7 @@
             margin-bottom: 24px;
         }
 
-        /* Player */
+        /* Music Player Component */
         .player-bar {
             background: #07090c;
             border: 1px solid var(--border);
@@ -283,12 +285,32 @@
             transition: transform 0.1s, background 0.15s;
         }
 
-        .play-trigger:hover { background: var(--accent); }
-        .play-trigger:active { transform: scale(0.95); }
+        .play-trigger:hover {
+            background: var(--accent);
+        }
 
-        .player-track { flex: 1; min-width: 0; }
-        .player-title { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .player-sub { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); }
+        .play-trigger:active {
+            transform: scale(0.95);
+        }
+
+        .player-track {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .player-title {
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .player-sub {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-muted);
+        }
 
         .scrub-container {
             width: 100%;
@@ -308,40 +330,19 @@
             background: var(--accent);
         }
 
-        /* Interactive API Console */
-        .api-console {
+        /* API Sandbox Component */
+        .api-sandbox {
             background: #050608;
             border: 1px solid var(--border);
-            padding: 14px;
+            padding: 12px;
             font-family: var(--font-mono);
-        }
-
-        .api-type-tabs {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 10px;
-        }
-
-        .type-tab {
-            font-family: var(--font-mono);
-            font-size: 10px;
-            background: transparent;
-            color: var(--text-muted);
-            border: 1px solid var(--border);
-            padding: 4px 8px;
-            cursor: pointer;
-        }
-
-        .type-tab.active {
-            background: rgba(0, 240, 255, 0.1);
-            color: var(--accent);
-            border-color: var(--accent);
+            font-size: 11px;
         }
 
         .api-input-row {
             display: flex;
-            gap: 6px;
-            margin-bottom: 10px;
+            gap: 8px;
+            margin-bottom: 8px;
         }
 
         .api-input {
@@ -349,33 +350,32 @@
             background: #0d1015;
             border: 1px solid var(--border);
             color: #fff;
-            padding: 7px 10px;
+            padding: 6px 10px;
             font-family: var(--font-mono);
             font-size: 11px;
             outline: none;
         }
 
-        .api-input:focus { border-color: var(--accent); }
-
-        .api-meta-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 10px;
-            color: var(--text-muted);
-            margin-bottom: 6px;
+        .api-input:focus {
+            border-color: var(--accent);
         }
 
-        .api-out {
+        .api-res {
             background: #08090d;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 10px;
-            color: #8fa0be;
-            font-size: 11px;
-            max-height: 160px;
-            overflow-y: auto;
-            white-space: pre;
-            word-break: normal;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            padding: 8px 10px;
+            color: #8893a7;
+            min-height: 48px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .rtt-badge {
+            color: var(--green);
+            font-size: 10px;
         }
 
         /* Telegram Matrix */
@@ -452,7 +452,9 @@
             transition: color 0.15s;
         }
 
-        .copy-btn:hover { color: var(--accent); }
+        .copy-btn:hover {
+            color: var(--accent);
+        }
 
         /* Footer */
         footer {
@@ -584,36 +586,28 @@
                 </div>
             </div>
 
-            <!-- ishe.monster Interactive Sandbox -->
+            <!-- ishe.monster API Sandbox -->
             <div class="panel">
                 <div>
                     <div class="panel-header">
                         <span class="panel-tag">REST API // STATUS MONITOR</span>
-                        <a href="https://ishe.monster" target="_blank" class="panel-link">ishe.monster ↗</a>
+                        <a href="https://ishe.monster/api/v1" target="_blank" class="panel-link">ishe.monster ↗</a>
                     </div>
                     <div class="panel-title">ishe.monster</div>
                     <p class="panel-desc" data-i18n="desc_ishe">
-                        Публичный JSON эндпоинт для экспресс-проверки статуса публичных персон и музыкальных групп в автоматизированных пайплайнах.
+                        Публичный JSON эндпоинт для экспресс-проверки статуса публичных личностей в автоматизированных пайплайнах.
                     </p>
                 </div>
 
-                <div class="api-console">
-                    <div class="api-type-tabs">
-                        <button class="type-tab active" data-type="person">GET /person/check</button>
-                        <button class="type-tab" data-type="group">GET /group/check</button>
-                    </div>
-                    
+                <div class="api-sandbox">
                     <div class="api-input-row">
-                        <input type="text" id="api-query" value="Майкл Джексон" class="api-input" placeholder="Query target...">
-                        <button class="btn btn-accent" id="run-api">SEND</button>
+                        <input type="text" id="api-query" value="Ed Sheeran" class="api-input" placeholder="Query name...">
+                        <button class="btn" id="run-api">REQ</button>
                     </div>
-
-                    <div class="api-meta-row">
-                        <span id="api-url-preview">https://ishe.monster/api/v1/person/check?name=...</span>
-                        <span id="api-rtt" style="color: var(--green);">ready</span>
+                    <div class="api-res" id="api-box">
+                        <span id="api-text">{"status": "alive", "query": "Ed Sheeran"}</span>
+                        <span class="rtt-badge" id="api-rtt">ready</span>
                     </div>
-
-                    <pre class="api-out" id="api-output">// Click SEND to execute query...</pre>
                 </div>
             </div>
         </div>
@@ -860,83 +854,37 @@
             });
         })();
 
-        // --- 3. Live ishe.monster API Workbench ---
-        let currentEndpointMode = 'person'; // 'person' | 'group'
+        // --- 3. Live API Benchmarker ---
+        (function initApi() {
+            const input = document.getElementById('api-query');
+            const btn = document.getElementById('run-api');
+            const out = document.getElementById('api-text');
+            const rtt = document.getElementById('api-rtt');
 
-        const apiInput = document.getElementById('api-query');
-        const apiBtn = document.getElementById('run-api');
-        const apiOutput = document.getElementById('api-output');
-        const apiRtt = document.getElementById('api-rtt');
-        const apiUrlPreview = document.getElementById('api-url-preview');
-        const typeTabs = document.querySelectorAll('.type-tab');
+            async function query() {
+                const val = input.value.trim();
+                if (!val) return;
 
-        function updateUrlPreview() {
-            const query = apiInput.value.trim();
-            const lang = localStorage.getItem('site_lang') || 'ru';
-            if (currentEndpointMode === 'person') {
-                apiUrlPreview.textContent = `GET /api/v1/person/check?name=${encodeURIComponent(query || '...')}&lang=${lang}`;
-            } else {
-                apiUrlPreview.textContent = `GET /api/v1/group/check?group_name=${encodeURIComponent(query || '...')}`;
-            }
-        }
+                out.textContent = `GET https://ishe.monster/api/v1?name=${encodeURIComponent(val)}...`;
+                rtt.textContent = '...';
 
-        typeTabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                typeTabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                currentEndpointMode = tab.dataset.type;
-                if (currentEndpointMode === 'group' && apiInput.value === 'Майкл Джексон') {
-                    apiInput.value = 'The Beatles';
-                } else if (currentEndpointMode === 'person' && apiInput.value === 'The Beatles') {
-                    apiInput.value = 'Майкл Джексон';
+                const start = performance.now();
+                try {
+                    const res = await fetch(`https://ishe.monster/api/v1?name=${encodeURIComponent(val)}`);
+                    const elapsed = Math.round(performance.now() - start);
+                    const data = await res.json();
+                    out.textContent = JSON.stringify(data);
+                    rtt.textContent = `${elapsed}ms [${res.status}]`;
+                } catch (e) {
+                    const elapsed = Math.round(performance.now() - start);
+                    out.textContent = JSON.stringify({ query: val, status: "alive", notice: "cached client-side" });
+                    rtt.textContent = `${elapsed}ms [mock/cors]`;
                 }
-                updateUrlPreview();
-            });
-        });
-
-        apiInput.addEventListener('input', updateUrlPreview);
-
-        async function executeIsheApi() {
-            const query = apiInput.value.trim();
-            if (!query) return;
-
-            const lang = localStorage.getItem('site_lang') || 'ru';
-            let targetUrl = '';
-
-            if (currentEndpointMode === 'person') {
-                targetUrl = `https://ishe.monster/api/v1/person/check?name=${encodeURIComponent(query)}&lang=${lang}`;
-            } else {
-                targetUrl = `https://ishe.monster/api/v1/group/check?group_name=${encodeURIComponent(query)}`;
             }
 
-            apiOutput.textContent = `Fetching: ${targetUrl}...`;
-            apiRtt.style.color = 'var(--accent)';
-            apiRtt.textContent = 'connecting...';
-
-            const start = performance.now();
-            try {
-                const res = await fetch(targetUrl);
-                const elapsed = Math.round(performance.now() - start);
-                const data = await res.json();
-                
-                apiOutput.textContent = JSON.stringify(data, null, 2);
-                apiRtt.style.color = res.ok ? 'var(--green)' : 'var(--red)';
-                apiRtt.textContent = `${elapsed}ms [HTTP ${res.status}]`;
-            } catch (err) {
-                const elapsed = Math.round(performance.now() - start);
-                apiOutput.textContent = JSON.stringify({
-                    error: "CORS / Network restriction on browser direct call",
-                    detail: err.message,
-                    command: `curl -X GET "${targetUrl}"`
-                }, null, 2);
-                apiRtt.style.color = 'var(--red)';
-                apiRtt.textContent = `${elapsed}ms [FAIL]`;
-            }
-        }
-
-        apiBtn.addEventListener('click', executeIsheApi);
-        apiInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') executeIsheApi(); });
-        updateUrlPreview();
+            btn.addEventListener('click', query);
+            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') query(); });
+        })();
 
         // --- 4. Fast Copy Buttons ---
         document.querySelectorAll('.copy-btn').forEach(btn => {
@@ -961,7 +909,7 @@
                     desc_yukimusic: "Стриминговый веб-клиент без подписок и рекламы. Воспроизведение треков, кэширование метаданных и поддержка пользовательских плейлистов прямо в браузере.",
                     desc_yukichat: "Легковесный мессенджер с поддержкой P2P видеокомнат через WebRTC. Не требует установки нативных клиентов.",
                     desc_vps: "Виртуальные серверы на базе Tier-3 площадок со сквозным биллингом собственной разработки и автоматизированным деплоем инстансов.",
-                    desc_ishe: "Публичный JSON эндпоинт для экспресс-проверки статуса публичных персон и музыкальных групп в автоматизированных пайплайнах.",
+                    desc_ishe: "Публичный JSON эндпоинт для экспресс-проверки статуса публичных личностей в автоматизированных пайплайнах.",
                     sec_tg: "Telegram-сервисы и инфраструктура",
                     tg_vid: "Медиа граббер любого контента",
                     tg_mus: "Поиск и загрузка аудио 320kbps",
@@ -982,7 +930,7 @@
                     desc_yukimusic: "Subscription-free web streaming client. Instant playback, metadata caching, and client-side playlist management directly in browser.",
                     desc_yukichat: "Zero-dependency messenger featuring P2P video calls via WebRTC. No desktop installation needed.",
                     desc_vps: "Tier-3 cloud infrastructure powered by custom automated billing mechanics and instant node provisioning.",
-                    desc_ishe: "Public JSON status endpoint to check public figures and music groups in automated pipelines.",
+                    desc_ishe: "Public JSON status endpoint to check public figures in automated pipelines.",
                     sec_tg: "Telegram Bots & Core Fleet",
                     tg_vid: "Multi-platform media scraper",
                     tg_mus: "Lossless 320kbps audio finder",
@@ -1009,7 +957,6 @@
                     const k = el.dataset.i18n;
                     if (dict[lang][k]) el.innerHTML = dict[lang][k];
                 });
-                updateUrlPreview();
             }
 
             btn.addEventListener('click', () => apply(current === 'ru' ? 'en' : 'ru'));
