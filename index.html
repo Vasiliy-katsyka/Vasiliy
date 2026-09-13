@@ -261,75 +261,6 @@
             margin-bottom: 24px;
         }
 
-        /* Music Player Component */
-        .player-bar {
-            background: #07090c;
-            border: 1px solid var(--border);
-            padding: 12px 14px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .play-trigger {
-            width: 38px;
-            height: 38px;
-            background: var(--text-main);
-            color: #000;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            transition: transform 0.1s, background 0.15s;
-        }
-
-        .play-trigger:hover {
-            background: var(--accent);
-        }
-
-        .play-trigger:active {
-            transform: scale(0.95);
-        }
-
-        .player-track {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .player-title {
-            font-size: 12px;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .player-sub {
-            font-family: var(--font-mono);
-            font-size: 10px;
-            color: var(--text-muted);
-        }
-
-        .scrub-container {
-            width: 100%;
-            height: 3px;
-            background: rgba(255,255,255,0.1);
-            margin-top: 6px;
-            position: relative;
-            cursor: pointer;
-        }
-
-        .scrub-progress {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 0%;
-            background: var(--accent);
-        }
-
         /* API Sandbox Component */
         .api-sandbox {
             background: #050608;
@@ -511,6 +442,26 @@
         <div class="section-label" data-i18n="sec_core">Core Web Services</div>
         
         <div class="grid-asym-1">
+            <!-- Kopro AI -->
+            <div class="panel" style="grid-column: 1 / -1;">
+                <div>
+                    <div class="panel-header">
+                        <span class="panel-tag">AI // LLM ECOSYSTEM</span>
+                        <a href="https://kopro.mom" target="_blank" class="panel-link">kopro.mom ↗</a>
+                    </div>
+                    <div class="panel-title">Kopro AI</div>
+                    <p class="panel-desc" data-i18n="desc_kopro">
+                        Собственная дообученная нейросеть с отдельным приложением и интеграцией множества подключенных сервисов.
+                    </p>
+                </div>
+
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <a href="https://kopro.mom" target="_blank" class="btn" style="flex:1; justify-content:center;">kopro.mom</a>
+                    <a href="https://studio.kopro.mom" target="_blank" class="btn" style="flex:1; justify-content:center;">studio.kopro.mom</a>
+                    <a href="https://docs.kopro.mom" target="_blank" class="btn" style="flex:1; justify-content:center;">docs.kopro.mom</a>
+                </div>
+            </div>
+
             <!-- YukiMusic -->
             <div class="panel">
                 <div>
@@ -524,19 +475,9 @@
                     </p>
                 </div>
 
-                <div class="player-bar">
-                    <button class="play-trigger" id="audio-toggle">
-                        <i class="fa-solid fa-play" id="play-ico"></i>
-                    </button>
-                    <div class="player-track">
-                        <div class="player-title">Shape of You</div>
-                        <div class="player-sub">Ed Sheeran • Preview Stream</div>
-                        <div class="scrub-container" id="scrub-box">
-                            <div class="scrub-progress" id="scrub-fill"></div>
-                        </div>
-                    </div>
+                <div style="display: flex; gap: 8px;">
+                    <a href="https://music.yukichat.lol" target="_blank" class="btn" style="flex:1; justify-content:center;">Web Player</a>
                 </div>
-                <audio id="core-audio" preload="none" src="https://cdns-preview-d.dzcdn.net/stream/c-deda7fa9316d9aa52f7608f3e4810351-7.mp3"></audio>
             </div>
 
             <!-- YukiChat -->
@@ -816,45 +757,7 @@
             render();
         })();
 
-        // --- 2. Compact Audio Engine ---
-        (function initAudio() {
-            const audio = document.getElementById('core-audio');
-            const toggle = document.getElementById('audio-toggle');
-            const ico = document.getElementById('play-ico');
-            const fill = document.getElementById('scrub-fill');
-            const box = document.getElementById('scrub-box');
-
-            toggle.addEventListener('click', () => {
-                if (audio.paused) {
-                    audio.play().then(() => {
-                        ico.className = 'fa-solid fa-pause';
-                    }).catch(() => {});
-                } else {
-                    audio.pause();
-                    ico.className = 'fa-solid fa-play';
-                }
-            });
-
-            audio.addEventListener('timeupdate', () => {
-                if (audio.duration) {
-                    fill.style.width = `${(audio.currentTime / audio.duration) * 100}%`;
-                }
-            });
-
-            audio.addEventListener('ended', () => {
-                ico.className = 'fa-solid fa-play';
-                fill.style.width = '0%';
-            });
-
-            box.addEventListener('click', (e) => {
-                if (!audio.duration) return;
-                const rect = box.getBoundingClientRect();
-                const ratio = (e.clientX - rect.left) / rect.width;
-                audio.currentTime = ratio * audio.duration;
-            });
-        })();
-
-        // --- 3. Live API Benchmarker ---
+        // --- 2. Live API Benchmarker ---
         (function initApi() {
             const input = document.getElementById('api-query');
             const btn = document.getElementById('run-api');
@@ -886,7 +789,7 @@
             input.addEventListener('keydown', (e) => { if (e.key === 'Enter') query(); });
         })();
 
-        // --- 4. Fast Copy Buttons ---
+        // --- 3. Fast Copy Buttons ---
         document.querySelectorAll('.copy-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -899,13 +802,14 @@
             });
         });
 
-        // --- 5. Bilingual System ---
+        // --- 4. Bilingual System ---
         (function initLang() {
             const dict = {
                 ru: {
                     hero_title: "Проектирую API, Telegram-экосистемы <span>и независимые веб-сервисы.</span>",
                     hero_desc: "Фокус на отказоустойчивости, минималистичных интерфейсах и чистой клиентской архитектуре. Открытый код + заказной софт.",
                     sec_core: "Ключевые веб-проекты",
+                    desc_kopro: "Собственная дообученная нейросеть с отдельным приложением и интеграцией множества подключенных сервисов.",
                     desc_yukimusic: "Стриминговый веб-клиент без подписок и рекламы. Воспроизведение треков, кэширование метаданных и поддержка пользовательских плейлистов прямо в браузере.",
                     desc_yukichat: "Легковесный мессенджер с поддержкой P2P видеокомнат через WebRTC. Не требует установки нативных клиентов.",
                     desc_vps: "Виртуальные серверы на базе Tier-3 площадок со сквозным биллингом собственной разработки и автоматизированным деплоем инстансов.",
@@ -927,6 +831,7 @@
                     hero_title: "Engineering robust APIs, Telegram ecosystems <span>and open web tools.</span>",
                     hero_desc: "Focusing on high availability, raw interface performance, and clean client-side architectures. Open source & contract engineering.",
                     sec_core: "Featured Web Engines",
+                    desc_kopro: "Self fine tuned ai with own app, with many connected apps integration.",
                     desc_yukimusic: "Subscription-free web streaming client. Instant playback, metadata caching, and client-side playlist management directly in browser.",
                     desc_yukichat: "Zero-dependency messenger featuring P2P video calls via WebRTC. No desktop installation needed.",
                     desc_vps: "Tier-3 cloud infrastructure powered by custom automated billing mechanics and instant node provisioning.",
