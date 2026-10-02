@@ -4,868 +4,1569 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>katsyka — dev & infrastructure</title>
-    
+    <meta name="description" content="katsyka: APIs, Telegram ecosystems and independent web services — Kopro AI, Skebobs, Bleper, Notify Mom, YukiChat, CompactVPS and more.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="katsyka — dev & infrastructure">
+    <meta property="og:description" content="APIs, Telegram ecosystems and independent web services.">
+    <meta name="theme-color" content="#0b0b0d" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f5f5f1" media="(prefers-color-scheme: light)">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23d7ff5c'/%3E%3Ctext x='32' y='45' font-family='Arial,sans-serif' font-weight='700' font-size='38' text-anchor='middle' fill='%230b0b0d'%3Ek%3C/text%3E%3C/svg%3E">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
         :root {
-            --bg: #07080b;
-            --surface: #0e1117;
-            --surface-hover: #131720;
-            --border: rgba(255, 255, 255, 0.08);
-            --border-active: rgba(0, 240, 255, 0.4);
-            --text-main: #f0f4fc;
-            --text-muted: #7e889b;
-            --accent: #00f0ff;
-            --accent-dim: rgba(0, 240, 255, 0.12);
-            --green: #00ffaa;
-            --font-sans: 'Plus Jakarta Sans', -apple-system, sans-serif;
-            --font-mono: 'Space Mono', monospace;
+            --bg: #0b0b0d;
+            --card: #111114;
+            --card-2: #16161a;
+            --line: rgba(255, 255, 255, 0.07);
+            --line-2: rgba(255, 255, 255, 0.14);
+            --text: #ededf0;
+            --muted: #8d8d98;
+            --faint: #5c5c66;
+            --accent: #d7ff5c;
+            --accent-ink: #d7ff5c;
+            --on-accent: #0b0b0d;
+            --dot: rgba(255, 255, 255, 0.06);
+            --dot-hi: rgba(215, 255, 92, 0.55);
+            --shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 20px 40px -24px rgba(0, 0, 0, 0.6);
+            --c-mix: 100%;
+            --font-sans: 'Geist', -apple-system, 'Segoe UI', sans-serif;
+            --font-mono: 'Geist Mono', ui-monospace, monospace;
+            --font-serif: 'Instrument Serif', Georgia, serif;
+            --radius: 18px;
+            color-scheme: dark;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg: #f5f5f1;
+                --card: #ffffff;
+                --card-2: #f7f7f4;
+                --line: rgba(0, 0, 0, 0.08);
+                --line-2: rgba(0, 0, 0, 0.16);
+                --text: #141416;
+                --muted: #5f5f68;
+                --faint: #9a9aa3;
+                --accent-ink: #4d7c0f;
+                --dot: rgba(0, 0, 0, 0.07);
+                --dot-hi: rgba(77, 124, 15, 0.55);
+                --shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 20px 40px -28px rgba(0, 0, 0, 0.25);
+                --c-mix: 45%;
+                color-scheme: light;
+            }
         }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 
         body {
-            background-color: var(--bg);
-            color: var(--text-main);
+            background: var(--bg);
+            color: var(--text);
             font-family: var(--font-sans);
-            line-height: 1.5;
+            font-size: 15px;
+            line-height: 1.55;
             overflow-x: hidden;
-            selection-background-color: var(--accent);
-            selection-color: #000;
+            -webkit-font-smoothing: antialiased;
         }
 
-        ::selection {
-            background: var(--accent);
-            color: #000;
-        }
+        ::selection { background: var(--accent); color: var(--on-accent); }
 
-        /* Canvas background */
-        #bg-canvas {
+        a { color: inherit; }
+
+        :focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; border-radius: 6px; }
+
+        /* ---------- Background: dot grid + cursor spotlight ---------- */
+        .bg, .bg-hi {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+            inset: 0;
             z-index: 0;
             pointer-events: none;
+            background-image: radial-gradient(circle, var(--dot) 1px, transparent 1.4px);
+            background-size: 28px 28px;
+            background-position: -14px -14px;
         }
 
-        .viewport {
+        .bg-hi {
+            background-image: radial-gradient(circle, var(--dot-hi) 1.2px, transparent 1.6px);
+            -webkit-mask-image: radial-gradient(240px circle at var(--mx, -999px) var(--my, -999px), #000 0%, transparent 70%);
+            mask-image: radial-gradient(240px circle at var(--mx, -999px) var(--my, -999px), #000 0%, transparent 70%);
+        }
+
+        .bg-glow {
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 720px;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(600px 320px at 15% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 70%),
+                radial-gradient(520px 300px at 85% 10%, rgba(167, 139, 250, 0.10), transparent 70%);
+        }
+
+        .wrap {
             position: relative;
             z-index: 1;
-            max-width: 1240px;
+            max-width: 1180px;
             margin: 0 auto;
-            padding: 24px 20px 80px;
+            padding: 0 24px;
         }
 
-        /* Header */
-        header {
+        @media (max-width: 600px) { .wrap { padding: 0 16px; } }
+
+        /* ---------- Header ---------- */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: saturate(160%) blur(14px);
+            -webkit-backdrop-filter: saturate(160%) blur(14px);
+            background: color-mix(in srgb, var(--bg) 72%, transparent);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .topbar .wrap {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding-bottom: 28px;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 48px;
+            justify-content: space-between;
+            gap: 16px;
+            height: 64px;
         }
 
         .brand {
-            font-family: var(--font-mono);
-            font-weight: 700;
-            font-size: 15px;
-            letter-spacing: -0.5px;
-            color: var(--text-main);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .brand-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--green);
-            box-shadow: 0 0 10px var(--green);
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .btn {
-            font-family: var(--font-mono);
-            font-size: 12px;
-            padding: 8px 14px;
-            background: transparent;
-            color: var(--text-main);
-            border: 1px solid var(--border);
-            text-decoration: none;
-            cursor: pointer;
-            transition: all 0.15s ease;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-        }
-
-        .btn:hover {
-            border-color: var(--text-main);
-            background: rgba(255, 255, 255, 0.04);
-        }
-
-        .btn-accent {
-            border-color: var(--accent);
-            color: var(--accent);
-            background: var(--accent-dim);
-        }
-
-        .btn-accent:hover {
-            background: var(--accent);
-            color: #000;
-            border-color: var(--accent);
-        }
-
-        /* Hero */
-        .hero {
-            display: grid;
-            grid-template-columns: 1.8fr 1fr;
-            gap: 40px;
-            align-items: end;
-            margin-bottom: 56px;
-        }
-
-        @media (max-width: 860px) {
-            .hero { grid-template-columns: 1fr; gap: 24px; }
-        }
-
-        .hero-title {
-            font-size: clamp(32px, 4.5vw, 54px);
-            font-weight: 800;
-            line-height: 1.08;
-            letter-spacing: -1.8px;
-            color: #fff;
-        }
-
-        .hero-title span {
-            color: var(--text-muted);
-            font-weight: 400;
-        }
-
-        .hero-meta {
-            font-family: var(--font-mono);
-            font-size: 12px;
-            color: var(--text-muted);
-            line-height: 1.8;
-            border-left: 2px solid var(--border);
-            padding-left: 16px;
-        }
-
-        /* Asymmetric Layout */
-        .section-label {
-            font-family: var(--font-mono);
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--accent);
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .section-label::after {
-            content: "";
-            flex: 1;
-            height: 1px;
-            background: var(--border);
-        }
-
-        .grid-asym-1 {
-            display: grid;
-            grid-template-columns: 1.25fr 0.75fr;
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-
-        .grid-asym-2 {
-            display: grid;
-            grid-template-columns: 0.85fr 1.15fr;
-            gap: 16px;
-            margin-bottom: 48px;
-        }
-
-        @media (max-width: 900px) {
-            .grid-asym-1, .grid-asym-2 {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .panel {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            padding: 24px;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: border-color 0.2s ease;
-        }
-
-        .panel:hover {
-            border-color: rgba(255, 255, 255, 0.18);
-        }
-
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 16px;
-        }
-
-        .panel-tag {
-            font-family: var(--font-mono);
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-
-        .panel-link {
-            font-family: var(--font-mono);
-            font-size: 12px;
-            color: var(--accent);
+            gap: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            letter-spacing: -0.3px;
             text-decoration: none;
         }
-        .panel-link:hover { text-decoration: underline; }
 
-        .panel-title {
-            font-size: 20px;
+        .brand-mark {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: var(--accent);
+            color: var(--on-accent);
+            display: grid;
+            place-items: center;
             font-weight: 700;
-            color: #fff;
-            margin-bottom: 8px;
-            letter-spacing: -0.4px;
+            font-size: 15px;
         }
 
-        .panel-desc {
-            font-size: 13.5px;
-            color: var(--text-muted);
-            line-height: 1.6;
+        .nav { display: flex; gap: 4px; }
+
+        .nav a {
+            font-size: 14px;
+            color: var(--muted);
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 999px;
+            transition: color .15s, background .15s;
+        }
+
+        .nav a:hover { color: var(--text); background: var(--line); }
+
+        @media (max-width: 760px) { .nav { display: none; } }
+
+        .top-actions { display: flex; align-items: center; gap: 10px; }
+
+        .lang {
+            display: inline-flex;
+            padding: 3px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: var(--card);
+        }
+
+        .lang button {
+            font: 500 12px var(--font-mono);
+            color: var(--muted);
+            background: transparent;
+            border: 0;
+            padding: 5px 10px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: color .15s, background .15s;
+        }
+
+        .lang button[aria-pressed="true"] { background: var(--text); color: var(--bg); }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font: 500 14px var(--font-sans);
+            padding: 10px 16px;
+            border-radius: 999px;
+            border: 1px solid var(--line-2);
+            background: var(--card);
+            color: var(--text);
+            text-decoration: none;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: transform .15s, background .15s, border-color .15s;
+        }
+
+        .btn:hover { border-color: var(--text); }
+        .btn:active { transform: translateY(1px); }
+
+        .btn-primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--on-accent);
+        }
+
+        .btn-primary:hover { border-color: var(--accent); filter: brightness(1.05); }
+
+        .btn-sm { padding: 7px 12px; font-size: 13px; }
+
+        @media (max-width: 420px) { .top-actions .btn-tg span { display: none; } }
+
+        /* ---------- Hero ---------- */
+        .hero { padding: 96px 0 72px; }
+
+        @media (max-width: 600px) { .hero { padding: 56px 0 48px; } }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font: 500 12px var(--font-mono);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            padding: 6px 12px 6px 10px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: var(--card);
+            margin-bottom: 28px;
+        }
+
+        .pulse {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #34d399;
+            box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.6);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.55); }
+            70% { box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+        }
+
+        .hero h1 {
+            font-size: clamp(38px, 6.4vw, 84px);
+            font-weight: 600;
+            line-height: 1.02;
+            letter-spacing: -0.04em;
+            max-width: 15ch;
+            text-wrap: balance;
+        }
+
+        .hero h1 em, .cta h2 em {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-weight: 400;
+            letter-spacing: -0.01em;
+            color: var(--muted);
+        }
+
+        .lede {
+            margin-top: 24px;
+            max-width: 56ch;
+            font-size: clamp(16px, 1.6vw, 18px);
+            color: var(--muted);
+        }
+
+        .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 32px; }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin-top: 64px;
+            border-top: 1px solid var(--line);
+        }
+
+        .stat { padding: 20px 20px 0 0; }
+        .stat + .stat { padding-left: 20px; border-left: 1px solid var(--line); }
+
+        .stat-num {
+            font-size: clamp(26px, 3.4vw, 40px);
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-label { font-size: 13px; color: var(--muted); }
+
+        @media (max-width: 600px) {
+            .stats { margin-top: 44px; }
+            .stat { padding-right: 10px; }
+            .stat + .stat { padding-left: 12px; }
+        }
+
+        /* ---------- Sections ---------- */
+        section[id] { scroll-margin-top: 80px; }
+
+        .sec-head {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
             margin-bottom: 24px;
         }
 
-        /* API Sandbox Component */
-        .api-sandbox {
-            background: #050608;
-            border: 1px solid var(--border);
-            padding: 12px;
-            font-family: var(--font-mono);
-            font-size: 11px;
+        .sec-head h2 {
+            font-size: clamp(26px, 3vw, 36px);
+            font-weight: 600;
+            letter-spacing: -0.03em;
         }
 
-        .api-input-row {
-            display: flex;
-            gap: 8px;
+        .sec-head p { color: var(--muted); font-size: 15px; }
+
+        .sec-num {
+            font: 500 12px var(--font-mono);
+            color: var(--faint);
+            display: block;
             margin-bottom: 8px;
         }
 
-        .api-input {
-            flex: 1;
-            background: #0d1015;
-            border: 1px solid var(--border);
-            color: #fff;
-            padding: 6px 10px;
-            font-family: var(--font-mono);
-            font-size: 11px;
-            outline: none;
-        }
-
-        .api-input:focus {
-            border-color: var(--accent);
-        }
-
-        .api-res {
-            background: #08090d;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            padding: 8px 10px;
-            color: #8893a7;
-            min-height: 48px;
-            white-space: pre-wrap;
-            word-break: break-all;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
-        .rtt-badge {
-            color: var(--green);
-            font-size: 10px;
-        }
-
-        /* Telegram Matrix */
-        .matrix-grid {
+        /* ---------- Bento ---------- */
+        .bento {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 48px;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 112px;
         }
 
-        @media (max-width: 960px) {
-            .matrix-grid { grid-template-columns: 1fr; }
+        .s-4 { grid-column: span 4; }
+        .s-6 { grid-column: span 6; }
+        .s-8 { grid-column: span 8; }
+        .s-12 { grid-column: span 12; }
+
+        @media (max-width: 980px) {
+            .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .s-4 { grid-column: span 1; }
+            .s-6, .s-8, .s-12, .wide-md { grid-column: span 2; }
         }
 
-        .matrix-col {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            padding: 20px;
+        @media (max-width: 640px) {
+            .bento { grid-template-columns: minmax(0, 1fr); margin-bottom: 80px; }
+            .s-4, .s-6, .s-8, .s-12, .wide-md { grid-column: span 1; }
+        }
+
+        .card {
+            --c: var(--accent);
+            --c-ink: color-mix(in srgb, var(--c) var(--c-mix), var(--text));
+            position: relative;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 16px;
+            padding: 24px;
+            border-radius: var(--radius);
+            background: var(--card);
+            border: 1px solid var(--line);
+            box-shadow: var(--shadow);
+            transition: border-color .2s, transform .2s;
+            isolation: isolate;
         }
 
-        .matrix-heading {
+        .card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            background: radial-gradient(420px circle at var(--x, 50%) var(--y, -20%), color-mix(in srgb, var(--c) 13%, transparent), transparent 65%);
+            opacity: 0;
+            transition: opacity .3s;
+        }
+
+        .card:hover { border-color: color-mix(in srgb, var(--c) 35%, var(--line)); }
+        .card:hover::before { opacity: 1; }
+
+        .card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .icon {
+            width: 40px;
+            height: 40px;
+            flex: none;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            font-size: 16px;
+            color: var(--c-ink);
+            background: color-mix(in srgb, var(--c) 14%, transparent);
+            border: 1px solid color-mix(in srgb, var(--c) 22%, transparent);
+        }
+
+        .tag {
+            font: 500 11px var(--font-mono);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            text-align: right;
+        }
+
+        .card h3 {
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .card-desc { color: var(--muted); font-size: 14.5px; max-width: 62ch; }
+
+        .card-foot { margin-top: auto; display: flex; flex-wrap: wrap; gap: 8px; }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font: 500 12.5px var(--font-mono);
+            padding: 7px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--line-2);
+            color: var(--text);
+            text-decoration: none;
+            background: var(--card-2);
+            transition: border-color .15s, color .15s;
+        }
+
+        a.chip:hover { border-color: var(--c-ink); color: var(--c-ink); }
+
+        .chip-solid {
+            background: var(--c);
+            border-color: var(--c);
+            color: #0b0b0d;
+        }
+
+        a.chip-solid:hover { color: #0b0b0d; border-color: var(--c); filter: brightness(1.06); }
+
+        .chip-muted { color: var(--muted); border-color: var(--line); background: transparent; }
+
+        .badge {
+            font: 500 11px var(--font-mono);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 4px 9px;
+            border-radius: 999px;
+            color: var(--c-ink);
+            background: color-mix(in srgb, var(--c) 14%, transparent);
+            border: 1px solid color-mix(in srgb, var(--c) 30%, transparent);
+        }
+
+        .note {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            font-size: 13px;
+            color: var(--muted);
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px dashed var(--line-2);
+        }
+
+        .note i { color: var(--c-ink); margin-top: 3px; }
+
+        /* Kopro */
+        .kopro { min-height: 300px; }
+
+        .kopro-art {
+            position: absolute;
+            right: -60px;
+            top: -60px;
+            width: 320px;
+            height: 320px;
+            z-index: -1;
+            border-radius: 50%;
+            background: conic-gradient(from 200deg, transparent, color-mix(in srgb, var(--c) 30%, transparent), transparent 60%);
+            filter: blur(40px);
+            opacity: .7;
+        }
+
+        .chat { display: flex; flex-direction: column; gap: 8px; max-width: 460px; }
+
+        .bubble {
+            font-size: 13.5px;
+            padding: 10px 14px;
+            border-radius: 16px;
+            max-width: 85%;
+            border: 1px solid var(--line);
+            background: var(--card-2);
+        }
+
+        .bubble.me { align-self: flex-end; border-bottom-right-radius: 6px; background: color-mix(in srgb, var(--c) 16%, var(--card-2)); border-color: color-mix(in srgb, var(--c) 30%, transparent); }
+        .bubble.ai { border-bottom-left-radius: 6px; color: var(--muted); }
+        .bubble.ai b { color: var(--c-ink); font-weight: 600; }
+
+        /* Skebob wave */
+        .wave {
+            display: block;
+            width: calc(100% + 48px);
+            height: 190px;
+            margin: -4px -24px 0;
+            cursor: grab;
+            touch-action: pan-y;
+        }
+
+        /* Notify Mom inbox mock */
+        .inbox {
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: var(--card-2);
+            overflow: hidden;
+            font-size: 13px;
+        }
+
+        .inbox-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--line);
             font-family: var(--font-mono);
             font-size: 12px;
-            font-weight: 700;
+            color: var(--muted);
+        }
+
+        .inbox-bar b { color: var(--text); font-weight: 500; }
+
+        .mail {
+            display: grid;
+            grid-template-columns: 28px minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+        }
+
+        .mail + .mail { border-top: 1px solid var(--line); }
+
+        .mail-ava {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 12px;
             color: #fff;
+        }
+
+        .mail-from { font-weight: 500; display: block; }
+        .mail-subj { color: var(--muted); font-size: 12px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .otp {
+            font: 500 13px var(--font-mono);
+            letter-spacing: 0.08em;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 1px solid color-mix(in srgb, var(--c) 35%, transparent);
+            background: color-mix(in srgb, var(--c) 12%, transparent);
+            color: var(--c-ink);
+            cursor: pointer;
+        }
+
+        .inbox-foot {
+            padding: 8px 12px;
+            border-top: 1px solid var(--line);
+            font-size: 12px;
+            color: var(--muted);
             display: flex;
             align-items: center;
             gap: 8px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--border);
         }
 
-        .item-row {
+        /* VPS metrics */
+        .metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--line);
+            border: 1px solid var(--line);
+            margin-top: auto;
+        }
+
+        .metric { background: var(--card-2); padding: 12px; }
+        .metric-k { font: 500 10.5px var(--font-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+        .metric-v { font-weight: 600; font-size: 16px; }
+        .metric-v.good { color: var(--c-ink); }
+
+        /* ishe.monster API */
+        .ishe {
+            display: grid;
+            grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+            gap: 28px;
+            align-items: stretch;
+        }
+
+        .ishe > div:first-child { display: flex; flex-direction: column; gap: 16px; }
+
+        @media (max-width: 860px) { .ishe { grid-template-columns: minmax(0, 1fr); } }
+
+        .term {
+            border-radius: 14px;
+            border: 1px solid var(--line);
+            background: #08080a;
+            color: #d6d6dc;
+            font: 13px/1.6 var(--font-mono);
+            display: flex;
+            flex-direction: column;
+            min-height: 220px;
+            overflow: hidden;
+        }
+
+        .term-bar {
             display: flex;
             align-items: center;
+            gap: 6px;
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            color: #7a7a85;
+            font-size: 12px;
+        }
+
+        .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #2a2a30; display: inline-block; }
+        .term-bar span { margin-left: 8px; }
+
+        .term-form { display: flex; gap: 8px; padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.07); }
+
+        .term-form label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 0;
+            padding: 0 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #0f0f12;
+        }
+
+        .term-form label:focus-within { border-color: var(--accent); }
+
+        .term-form .method { color: var(--accent); font-size: 12px; }
+
+        .term-form input {
+            flex: 1;
+            min-width: 0;
+            background: transparent;
+            border: 0;
+            outline: 0;
+            color: #fff;
+            font: inherit;
+            padding: 9px 0;
+        }
+
+        .term-form button {
+            font: 500 13px var(--font-mono);
+            padding: 0 14px;
+            border-radius: 10px;
+            border: 0;
+            background: var(--accent);
+            color: #0b0b0d;
+            cursor: pointer;
+        }
+
+        .term-form button:disabled { opacity: .5; cursor: progress; }
+
+        .term-out {
+            flex: 1;
+            padding: 12px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: #a9a9b3;
+            max-height: 260px;
+            overflow: auto;
+        }
+
+        .term-out.is-ok { color: #c9f27a; }
+        .term-out.is-error { color: #ff8a7a; }
+
+        .term-status {
+            display: flex;
             justify-content: space-between;
-            padding: 10px;
-            border: 1px solid var(--border);
-            text-decoration: none;
-            color: inherit;
-            background: #090b10;
-            transition: border-color 0.15s, transform 0.1s;
-        }
-
-        .item-row:hover {
-            border-color: var(--border-active);
-            transform: translateX(2px);
-        }
-
-        .item-name {
-            font-family: var(--font-mono);
+            padding: 8px 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+            color: #7a7a85;
             font-size: 11.5px;
-            color: var(--text-main);
-            display: block;
         }
 
-        .item-desc {
-            font-size: 11px;
-            color: var(--text-muted);
-            display: block;
-            margin-top: 2px;
+        /* ---------- Telegram ---------- */
+        .tg-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 112px;
         }
+
+        @media (max-width: 980px) { .tg-grid { grid-template-columns: minmax(0, 1fr); margin-bottom: 80px; } }
+
+        .tg-col { padding: 18px; gap: 6px; }
+
+        .tg-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 4px 4px 12px;
+        }
+
+        .tg-head .icon { width: 32px; height: 32px; border-radius: 10px; font-size: 13px; }
+
+        .tg-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            border-radius: 12px;
+            transition: background .15s;
+        }
+
+        .tg-item:hover { background: var(--card-2); }
+
+        .tg-link {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            text-decoration: none;
+            border-radius: 12px;
+        }
+
+        .tg-ava {
+            width: 34px;
+            height: 34px;
+            flex: none;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font: 600 13px var(--font-sans);
+            text-transform: uppercase;
+            color: var(--c-ink);
+            background: color-mix(in srgb, var(--c) 14%, transparent);
+        }
+
+        .tg-name { display: block; font: 500 13.5px var(--font-mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tg-desc { display: block; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .copy-btn {
+            flex: none;
+            width: 34px;
+            height: 34px;
+            margin-right: 6px;
+            border-radius: 10px;
+            border: 0;
             background: transparent;
-            border: none;
-            color: var(--text-muted);
+            color: var(--faint);
             cursor: pointer;
-            padding: 4px 6px;
-            font-size: 11px;
-            transition: color 0.15s;
+            transition: color .15s, background .15s;
         }
 
-        .copy-btn:hover {
-            color: var(--accent);
+        .copy-btn:hover { color: var(--text); background: var(--line); }
+        .copy-btn.is-done { color: #34d399; }
+        .copy-btn.is-failed { color: #f87171; }
+
+        /* ---------- CTA + footer ---------- */
+        .cta {
+            text-align: center;
+            padding: 72px 24px;
+            border-radius: 28px;
+            border: 1px solid var(--line);
+            background:
+                radial-gradient(500px 220px at 50% 0%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%),
+                var(--card);
+            margin-bottom: 40px;
         }
 
-        /* Footer */
+        .cta h2 {
+            font-size: clamp(32px, 5vw, 60px);
+            font-weight: 600;
+            letter-spacing: -0.035em;
+            line-height: 1.05;
+        }
+
+        .cta p { color: var(--muted); margin: 16px auto 28px; max-width: 44ch; }
+
+        @media (max-width: 600px) { .cta { padding: 48px 20px; border-radius: 22px; } }
+
         footer {
-            border-top: 1px solid var(--border);
-            padding-top: 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-family: var(--font-mono);
-            font-size: 12px;
-            color: var(--text-muted);
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 24px 0 40px;
+            border-top: 1px solid var(--line);
+            font: 13px var(--font-mono);
+            color: var(--muted);
         }
 
-        @media (max-width: 600px) {
-            footer {
-                flex-direction: column;
-                gap: 16px;
-                align-items: flex-start;
-            }
+        footer a { text-decoration: none; }
+        footer a:hover { color: var(--text); }
+
+        .clock { font-variant-numeric: tabular-nums; color: var(--text); }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after { animation: none !important; transition: none !important; }
         }
     </style>
 </head>
 <body>
 
-    <canvas id="bg-canvas"></canvas>
+    <div class="bg" aria-hidden="true"></div>
+    <div class="bg-hi" aria-hidden="true"></div>
+    <div class="bg-glow" aria-hidden="true"></div>
 
-    <div class="viewport">
-        
-        <!-- Header -->
-        <header>
-            <a href="#" class="brand">
-                <span class="brand-dot"></span> /katsyka
+    <!-- Header -->
+    <header class="topbar">
+        <div class="wrap">
+            <a href="#" class="brand" aria-label="katsyka">
+                <span class="brand-mark">k</span> katsyka
             </a>
 
-            <div class="header-actions">
-                <button class="btn" id="lang-btn">RU / EN</button>
-                <a href="https://t.me/katsyka" target="_blank" class="btn btn-accent">
-                    <i class="fa-brands fa-telegram"></i> t.me/katsyka
+            <nav class="nav" aria-label="Sections">
+                <a href="#projects" data-i18n="nav_projects">Проекты</a>
+                <a href="#telegram">Telegram</a>
+                <a href="#contact" data-i18n="nav_contact">Контакт</a>
+            </nav>
+
+            <div class="top-actions">
+                <div class="lang" role="group" aria-label="Language">
+                    <button type="button" data-lang="ru" aria-pressed="true">RU</button>
+                    <button type="button" data-lang="en" aria-pressed="false">EN</button>
+                </div>
+                <a href="https://t.me/katsyka" target="_blank" rel="noopener" class="btn btn-sm btn-tg" aria-label="Telegram: @katsyka">
+                    <i class="fa-brands fa-telegram" aria-hidden="true"></i> <span>@katsyka</span>
                 </a>
             </div>
-        </header>
+        </div>
+    </header>
+
+    <main class="wrap">
 
         <!-- Hero -->
-        <div class="hero">
-            <h1 class="hero-title" data-i18n="hero_title">
-                Проектирую API, Telegram-экосистемы <span>и независимые веб-сервисы.</span>
-            </h1>
-            <div class="hero-meta" data-i18n="hero_desc">
-                Фокус на отказоустойчивости, минималистичных интерфейсах и чистой клиентской архитектуре. Открытый код + заказной софт.
-            </div>
-        </div>
-
-        <!-- Section 1: Core Web Apps (Asymmetric 1) -->
-        <div class="section-label" data-i18n="sec_core">Core Web Services</div>
-        
-        <div class="grid-asym-1">
-            <!-- Kopro AI -->
-            <div class="panel" style="grid-column: 1 / -1;">
-                <div>
-                    <div class="panel-header">
-                        <span class="panel-tag">AI // LLM ECOSYSTEM</span>
-                        <a href="https://kopro.mom" target="_blank" class="panel-link">kopro.mom ↗</a>
-                    </div>
-                    <div class="panel-title">Kopro AI</div>
-                    <p class="panel-desc" data-i18n="desc_kopro">
-                        Собственная дообученная нейросеть с отдельным приложением и интеграцией множества подключенных сервисов.
-                    </p>
-                </div>
-
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <a href="https://kopro.mom" target="_blank" class="btn" style="flex:1; justify-content:center;">kopro.mom</a>
-                    <a href="https://studio.kopro.mom" target="_blank" class="btn" style="flex:1; justify-content:center;">studio.kopro.mom</a>
-                    <a href="https://docs.kopro.mom" target="_blank" class="btn" style="flex:1; justify-content:center;">docs.kopro.mom</a>
-                </div>
+        <section class="hero">
+            <div class="eyebrow"><span class="pulse" aria-hidden="true"></span><span data-i18n="hero_eyebrow">Открыт для заказной разработки</span></div>
+            <h1 data-i18n-html="hero_title">Проектирую API, Telegram-экосистемы <em>и независимые веб-сервисы.</em></h1>
+            <p class="lede" data-i18n="hero_desc">Фокус на отказоустойчивости, минималистичных интерфейсах и чистой клиентской архитектуре. Открытый код и заказной софт.</p>
+            <div class="hero-actions">
+                <a href="https://t.me/katsyka" target="_blank" rel="noopener" class="btn btn-primary">
+                    <i class="fa-brands fa-telegram" aria-hidden="true"></i> <span data-i18n="hero_cta">Написать в Telegram</span>
+                </a>
+                <a href="#projects" class="btn"><span data-i18n="hero_more">Смотреть проекты</span> <i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
             </div>
 
-            <!-- YukiMusic -->
-            <div class="panel">
-                <div>
-                    <div class="panel-header">
-                        <span class="panel-tag">OPEN SOURCE // AUDIO STREAMING</span>
-                        <a href="https://music.yukichat.lol" target="_blank" class="panel-link">music.yukichat.lol ↗</a>
-                    </div>
-                    <div class="panel-title">YukiMusic</div>
-                    <p class="panel-desc" data-i18n="desc_yukimusic">
-                        Стриминговый веб-клиент без подписок и рекламы. Воспроизведение треков, кэширование метаданных и поддержка пользовательских плейлистов прямо в браузере.
-                    </p>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-num" id="stat-web">8</div>
+                    <div class="stat-label" data-i18n="stat_web">веб-проектов</div>
                 </div>
-
-                <div style="display: flex; gap: 8px;">
-                    <a href="https://music.yukichat.lol" target="_blank" class="btn" style="flex:1; justify-content:center;">Web Player</a>
+                <div class="stat">
+                    <div class="stat-num" id="stat-tg">12</div>
+                    <div class="stat-label" data-i18n="stat_tg">Telegram-сервисов</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num clock" id="clock">UTC+3</div>
+                    <div class="stat-label" data-i18n="stat_time">Москва, UTC+3</div>
                 </div>
             </div>
+        </section>
 
-            <!-- YukiChat -->
-            <div class="panel">
+        <!-- Projects -->
+        <section id="projects">
+            <div class="sec-head">
                 <div>
-                    <div class="panel-header">
-                        <span class="panel-tag">WEBRTC // REALTIME</span>
-                        <span style="font-family: var(--font-mono); font-size: 11px; color: var(--green);">● Active Node</span>
-                    </div>
-                    <div class="panel-title">YukiChat & Meet</div>
-                    <p class="panel-desc" data-i18n="desc_yukichat">
-                        Легковесный мессенджер с поддержкой P2P видеокомнат через WebRTC. Не требует установки нативных клиентов.
-                    </p>
+                    <span class="sec-num">01</span>
+                    <h2 data-i18n="sec_projects">Проекты</h2>
                 </div>
-
-                <div style="display: flex; gap: 8px;">
-                    <a href="https://yukichat.lol" target="_blank" class="btn" style="flex:1; justify-content:center;">Web Chat</a>
-                    <a href="https://meet.yukichat.lol" target="_blank" class="btn" style="flex:1; justify-content:center;">P2P Meet</a>
-                </div>
+                <p data-i18n="sec_projects_sub">Веб-сервисы, инфраструктура и эксперименты.</p>
             </div>
-        </div>
 
-        <!-- Section 2: Tools & Hosting (Asymmetric 2) -->
-        <div class="grid-asym-2">
-            <!-- CompactVPS -->
-            <div class="panel">
-                <div>
-                    <div class="panel-header">
-                        <span class="panel-tag">SYS // INFRASTRUCTURE</span>
-                        <span style="font-family: var(--font-mono); font-size: 11px; color: #fff;">KVM / NVMe</span>
+            <div class="bento">
+
+                <!-- Kopro AI -->
+                <article class="card project kopro s-8" style="--c:#a78bfa">
+                    <div class="kopro-art" aria-hidden="true"></div>
+                    <div class="card-top">
+                        <span class="icon"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i></span>
+                        <span class="tag">AI · LLM ecosystem</span>
                     </div>
-                    <div class="panel-title">CompactVPS</div>
-                    <p class="panel-desc" data-i18n="desc_vps">
-                        Виртуальные серверы на базе Tier-3 площадок со сквозным биллингом собственной разработки и автоматизированным деплоем инстансов.
-                    </p>
-                </div>
+                    <h3>Kopro AI</h3>
+                    <p class="card-desc" data-i18n="desc_kopro">Собственная дообученная нейросеть с отдельным приложением и интеграцией множества подключенных сервисов.</p>
+                    <div class="chat" aria-hidden="true">
+                        <div class="bubble me" data-i18n="kopro_q">Собери мне пост для канала и запости его в 18:00</div>
+                        <div class="bubble ai" data-i18n-html="kopro_a"><b>Kopro:</b> готово. Пост в черновиках, публикация запланирована на 18:00.</div>
+                    </div>
+                    <div class="card-foot">
+                        <a href="https://kopro.mom" target="_blank" rel="noopener" class="chip chip-solid">kopro.mom ↗</a>
+                        <a href="https://studio.kopro.mom" target="_blank" rel="noopener" class="chip">studio.kopro.mom ↗</a>
+                        <a href="https://docs.kopro.mom" target="_blank" rel="noopener" class="chip">docs.kopro.mom ↗</a>
+                    </div>
+                </article>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid var(--border); padding-top: 14px; font-family: var(--font-mono); font-size: 11px;">
+                <!-- Skebobs -->
+                <article class="card project s-4 wide-md" style="--c:#ff7ab6">
+                    <div class="card-top">
+                        <span class="icon"><i class="fa-solid fa-cube" aria-hidden="true"></i></span>
+                        <span class="tag">3D · Avatars</span>
+                    </div>
+                    <canvas class="wave" id="skebob-wave" aria-hidden="true"></canvas>
+                    <h3>Skebobs</h3>
+                    <p class="card-desc" data-i18n="desc_skebob">Мой проект Telegram-аватарок: сетка со всеми моими аватарками со Скебобом, и у каждой своя история. Всё это лежит на интерактивной 3D-волне, по которой можно перемещаться и летать.</p>
+                    <div class="card-foot">
+                        <a href="https://vasiliy-katsyka.github.io/Skebob" target="_blank" rel="noopener" class="chip chip-solid"><span data-i18n="open_skebob">Открыть галерею</span> ↗</a>
+                    </div>
+                </article>
+
+                <!-- Bleper -->
+                <article class="card project s-6" style="--c:#ff6a3d">
+                    <div class="card-top">
+                        <span class="icon"><i class="fa-solid fa-film" aria-hidden="true"></i></span>
+                        <span class="tag">Streaming · Torrent</span>
+                    </div>
+                    <h3>Bleper</h3>
+                    <p class="card-desc" data-i18n="desc_bleper">Сайт для просмотра фильмов на торрент-системе. Полностью бесплатно и без регистрации: все фильмы во всех возможных качествах и озвучках.</p>
+                    <div class="card-foot">
+                        <span class="chip chip-muted" data-i18n="bleper_free">Бесплатно</span>
+                        <span class="chip chip-muted" data-i18n="bleper_noreg">Без регистрации</span>
+                        <span class="chip chip-muted">4K · 1080p · 720p</span>
+                        <span class="chip chip-muted" data-i18n="bleper_dubs">Все озвучки</span>
+                    </div>
+                    <div class="note">
+                        <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                        <span data-i18n="bleper_note">Доступен только по HTTP, по прямому IP-адресу.</span>
+                    </div>
                     <div>
-                        <div style="color: var(--text-muted); font-size: 10px;">SLA AVAILABILITY</div>
-                        <div style="color: var(--green); font-weight: 700;">99.98%</div>
+                        <a href="http://144.31.188.168:9900" target="_blank" rel="noopener" class="chip chip-solid"><span data-i18n="open_bleper">Открыть Bleper</span> ↗</a>
                     </div>
-                    <div>
-                        <div style="color: var(--text-muted); font-size: 10px;">BILLING CORE</div>
-                        <div>Proprietary</div>
-                    </div>
-                </div>
-            </div>
+                </article>
 
-            <!-- ishe.monster API Sandbox -->
-            <div class="panel">
+                <!-- Notify Mom -->
+                <article class="card project s-6" style="--c:#ffc24b">
+                    <div class="card-top">
+                        <span class="icon"><i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i></span>
+                        <span class="tag">Mail · Inbox</span>
+                    </div>
+                    <h3>Notify Mom <span class="badge" data-i18n="soon">Скоро</span></h3>
+                    <p class="card-desc" data-i18n="desc_notify">Надоели @gmail.com и outlook.com? Встречайте name@notify.mom: мой собственный почтовый сервис с мгновенным копированием кодов подтверждения, антиспамом и удобным дашбордом.</p>
+                    <div class="inbox" aria-label="Notify Mom preview">
+                        <div class="inbox-bar"><b>name@notify.mom</b><span data-i18n="inbox_label">Входящие</span></div>
+                        <div class="mail">
+                            <span class="mail-ava" style="background:#2aabee"><i class="fa-brands fa-telegram" aria-hidden="true"></i></span>
+                            <span style="min-width:0"><span class="mail-from">Telegram</span><span class="mail-subj" data-i18n="mail_login">Код для входа</span></span>
+                            <button type="button" class="otp" data-copy-raw="482913" data-i18n-aria="copy_code" aria-label="Скопировать код">482 913 <i class="fa-regular fa-clone" aria-hidden="true"></i></button>
+                        </div>
+                        <div class="mail">
+                            <span class="mail-ava" style="background:#6b6b75"><i class="fa-brands fa-github" aria-hidden="true"></i></span>
+                            <span style="min-width:0"><span class="mail-from">GitHub</span><span class="mail-subj" data-i18n="mail_verify">Подтверждение устройства</span></span>
+                            <button type="button" class="otp" data-copy-raw="719054" data-i18n-aria="copy_code" aria-label="Скопировать код">719 054 <i class="fa-regular fa-clone" aria-hidden="true"></i></button>
+                        </div>
+                        <div class="inbox-foot"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span data-i18n="mail_spam">Сегодня заблокировано 23 спам-письма</span></div>
+                    </div>
+                </article>
+
+                <!-- YukiMusic -->
+                <article class="card project s-4" style="--c:#4ade80">
+                    <div class="card-top">
+                        <span class="icon"><i class="fa-solid fa-headphones" aria-hidden="true"></i></span>
+                        <span class="tag">Open source · Audio</span>
+                    </div>
+                    <h3>YukiMusic</h3>
+                    <p class="card-desc" data-i18n="desc_yukimusic">Стриминговый веб-клиент без подписок и рекламы. Воспроизведение треков, кэширование метаданных и пользовательские плейлисты прямо в браузере.</p>
+                    <div class="card-foot">
+                        <a href="https://music.yukichat.lol" target="_blank" rel="noopener" class="chip"><span data-i18n="open_player">Веб-плеер</span> ↗</a>
+                    </div>
+                </article>
+
+                <!-- YukiChat -->
+                <article class="card project s-4" style="--c:#38bdf8">
+                    <div class="card-top">
+                        <span class="icon"><i class="fa-solid fa-video" aria-hidden="true"></i></span>
+                        <span class="tag">WebRTC · Realtime</span>
+                    </div>
+                    <h3>YukiChat &amp; Meet</h3>
+                    <p class="card-desc" data-i18n="desc_yukichat">Легковесный мессенджер с P2P-видеокомнатами через WebRTC. Не требует установки нативных клиентов.</p>
+                    <div class="card-foot">
+                        <a href="https://yukichat.lol" target="_blank" rel="noopener" class="chip"><span data-i18n="open_chat">Веб-чат</span> ↗</a>
+                        <a href="https://meet.yukichat.lol" target="_blank" rel="noopener" class="chip">P2P Meet ↗</a>
+                    </div>
+                </article>
+
+                <!-- CompactVPS -->
+                <article class="card project s-4 wide-md" style="--c:#2dd4bf">
+                    <div class="card-top">
+                        <span class="icon"><i class="fa-solid fa-server" aria-hidden="true"></i></span>
+                        <span class="tag">KVM · NVMe</span>
+                    </div>
+                    <h3>CompactVPS</h3>
+                    <p class="card-desc" data-i18n="desc_vps">Виртуальные серверы на Tier-3 площадках со сквозным биллингом собственной разработки и автоматическим деплоем инстансов.</p>
+                    <div class="metrics">
+                        <div class="metric">
+                            <div class="metric-k" data-i18n="vps_sla">Доступность</div>
+                            <div class="metric-v good">99.98%</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-k" data-i18n="vps_billing">Биллинг</div>
+                            <div class="metric-v" data-i18n="vps_billing_val">Свой</div>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- ishe.monster -->
+                <article class="card project s-12" style="--c:#d7ff5c">
+                    <div class="ishe">
+                        <div>
+                            <div class="card-top">
+                                <span class="icon"><i class="fa-solid fa-heart-pulse" aria-hidden="true"></i></span>
+                                <span class="tag">REST API · Status</span>
+                            </div>
+                            <h3>ishe.monster</h3>
+                            <p class="card-desc" data-i18n="desc_ishe">Публичный JSON-эндпоинт для быстрой проверки статуса публичных личностей в автоматизированных пайплайнах.</p>
+                            <div class="card-foot">
+                                <a href="https://ishe.monster/api/v1" target="_blank" rel="noopener" class="chip">ishe.monster/api/v1 ↗</a>
+                            </div>
+                        </div>
+
+                        <div class="term">
+                            <div class="term-bar"><i></i><i></i><i></i><span data-i18n="api_title">живой запрос</span></div>
+                            <form class="term-form" id="api-form">
+                                <label>
+                                    <span class="method">GET</span>
+                                    <input type="text" id="api-query" value="Ed Sheeran" autocomplete="off" spellcheck="false" data-i18n-aria="api_input" aria-label="Имя для проверки">
+                                </label>
+                                <button type="submit" id="run-api" data-i18n="api_send">Отправить</button>
+                            </form>
+                            <div class="term-out" id="api-out" aria-live="polite" data-i18n="api_idle">// нажми «Отправить», чтобы сделать живой запрос</div>
+                            <div class="term-status"><span id="api-url">ishe.monster/api/v1?name=…</span><span id="api-rtt">idle</span></div>
+                        </div>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- Telegram -->
+        <section id="telegram">
+            <div class="sec-head">
                 <div>
-                    <div class="panel-header">
-                        <span class="panel-tag">REST API // STATUS MONITOR</span>
-                        <a href="https://ishe.monster/api/v1" target="_blank" class="panel-link">ishe.monster ↗</a>
+                    <span class="sec-num">02</span>
+                    <h2 data-i18n="sec_tg">Telegram-сервисы и боты</h2>
+                </div>
+                <p data-i18n="sec_tg_sub">Боты, мини-приложения и коммерческие решения.</p>
+            </div>
+
+            <div class="tg-grid">
+
+                <div class="card tg-col" style="--c:#38bdf8">
+                    <div class="tg-head">
+                        <span class="icon"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></span>
+                        <span>Compact Network</span>
                     </div>
-                    <div class="panel-title">ishe.monster</div>
-                    <p class="panel-desc" data-i18n="desc_ishe">
-                        Публичный JSON эндпоинт для экспресс-проверки статуса публичных личностей в автоматизированных пайплайнах.
-                    </p>
-                </div>
-
-                <div class="api-sandbox">
-                    <div class="api-input-row">
-                        <input type="text" id="api-query" value="Ed Sheeran" class="api-input" placeholder="Query name...">
-                        <button class="btn" id="run-api">REQ</button>
+                    <div class="tg-item">
+                        <a class="tg-link" href="https://t.me/compact_video_bot" target="_blank" rel="noopener">
+                            <span class="tg-ava">v</span>
+                            <span style="min-width:0"><span class="tg-name">@compact_video_bot</span><span class="tg-desc" data-i18n="tg_vid">Медиа-граббер любого контента</span></span>
+                        </a>
+                        <button type="button" class="copy-btn" data-copy="compact_video_bot"><i class="fa-regular fa-clone" aria-hidden="true"></i></button>
                     </div>
-                    <div class="api-res" id="api-box">
-                        <span id="api-text">{"status": "alive", "query": "Ed Sheeran"}</span>
-                        <span class="rtt-badge" id="api-rtt">ready</span>
+                    <div class="tg-item">
+                        <a class="tg-link" href="https://t.me/compact_music_bot" target="_blank" rel="noopener">
+                            <span class="tg-ava">m</span>
+                            <span style="min-width:0"><span class="tg-name">@compact_music_bot</span><span class="tg-desc" data-i18n="tg_mus">Поиск и загрузка аудио 320 kbps</span></span>
+                        </a>
+                        <button type="button" class="copy-btn" data-copy="compact_music_bot"><i class="fa-regular fa-clone" aria-hidden="true"></i></button>
+                    </div>
+                    <div class="tg-item">
+                        <a class="tg-link" href="https://t.me/compact_vpn_bot" target="_blank" rel="noopener">
+                            <span class="tg-ava">n</span>
+                            <span style="min-width:0"><span class="tg-name">@compact_vpn_bot</span><span class="tg-desc" data-i18n="tg_vpn">Туннели VLESS / Shadowsocks</span></span>
+                        </a>
+                        <button type="button" class="copy-btn" data-copy="compact_vpn_bot"><i class="fa-regular fa-clone" aria-hidden="true"></i></button>
+                    </div>
+                    <div class="tg-item">
+                        <a class="tg-link" href="https://t.me/CompactTelegram" target="_blank" rel="noopener">
+                            <span class="tg-ava">c</span>
+                            <span style="min-width:0"><span class="tg-name">@CompactTelegram</span><span class="tg-desc" data-i18n="tg_chan">Анонсы релизов и обновлений</span></span>
+                        </a>
+                        <button type="button" class="copy-btn" data-copy="CompactTelegram"><i class="fa-regular fa-clone" aria-hidden="true"></i></button>
                     </div>
                 </div>
+
+                <div class="card tg-col" style="--c:#c084fc">
+                    <div class="tg-head">
+                        <span class="icon"><i class="fa-solid fa-code-merge" aria-hidden="true"></i></span>
+                        <span data-i18n="col_tma">Трекеры и Mini Apps</span>
+                    </div>
+                    <div class="tg-item">
+                        <a class="tg-link" href="https://t.me/ed_concerts_bot" target="_blank" rel="noopener">
+                            <span class="tg-ava">e</span>
+                            <span style="min-width:0"><span class="tg-name">@ed_concerts_bot</span><span class="tg-desc" data-i18n="tg_ed">Мониторинг билетов тура Ed Sheeran</span></span>
+                        </a>
+                        <button type="button" class="copy-btn" data-copy="ed_concerts_bot"><i class="fa-regular fa-clone" aria-hidden="true"></i></button>
+                    </div>
+                    <div class="tg-item">
+                        <a class="tg-link" href="https://t.me/upgradeDemoBot" target="_blank" rel="noopener">
+                            <span class="tg-ava">u</span>
+                            <span style="min-width:0"><span class="tg-name">@upgradeDemoBot</span><span class="tg-desc" data-i18n="tg_upgrade">Интерактивная песочница TMA</span></span>
+                        </a>
+                        <button type="button" class="copy-btn" data-copy="upgradeDemoBot"><i class="fa-regular fa-clone" aria-hidden="true"></i></button>
+                    </div>
+                    <div class="tg-item">
+                        <a class="tg-link" href="https://t.me/geogur_bot" target="_blank" rel="noopener">
+                            <span class="tg-ava">g</span>
+                            <span style="min-width:0"><span class="tg-name">@geogur_bot</span><span class="tg-desc" data-i18n="tg_geo">Геолокационное веб-приложение</span></span>
+                        </a>
+                        <button type="button" class="copy-btn" data-copy="geogur_bot"><i class="fa-regular fa-clone" aria-hidden="true"></i></button>
+                    </div>
+                    <div class="tg-item">
+                        <a class="tg-link" href="https://t.me/giftsearch_robot" target="_blank" rel="noopener">
+                            <span class="tg-ava">g</span>
+                            <span style="min-width:0"><span class="tg-name">@giftsearch_robot</span><span class="tg-desc" data-i18n="tg_gifts">Парсинг маркета подарков Telegram</span></span>
+                        </a>
+                        <button type="button" class="copy-btn" data-copy="giftsearch_robot"><i class="fa-regular fa-clone" aria-hidden="true"></i></button>
+                    </div>
+                </div>
+
+                <div class="card tg-col" style="--c:#34d399">
+                    <div class="tg-head">
+                        <span class="icon"><i class="fa-solid fa-briefcase" aria-hidden="true"></i></span>
+                        <span data-i18n="col_b2b">Коммерческая разработка</span>
+                    </div>
+                    <div class="tg-item">
+                        <a class="tg-link" href="https://t.me/lazer_robbot" target="_blank" rel="noopener">
+                            <span class="tg-ava">l</span>
+                            <span style="min-width:0"><span class="tg-name">@lazer_robbot</span><span class="tg-desc" data-i18n="b2b_lazer">Бронирование лазертаг-арены (Мск)</span></span>
+                        </a>
+                        <button type="button" class="copy-btn" data-copy="lazer_robbot"><i class="fa-regular fa-clone" aria-hidden="true"></i></button>
+                    </div>
+                    <div class="tg-item">
+                        <a class="tg-link" href="https://t.me/UHticketBot" target="_blank" rel="noopener">
+                            <span class="tg-ava">u</span>
+                            <span style="min-width:0"><span class="tg-name">@UHticketBot</span><span class="tg-desc" data-i18n="b2b_tickets">Helpdesk и тикет-система</span></span>
+                        </a>
+                        <button type="button" class="copy-btn" data-copy="UHticketBot"><i class="fa-regular fa-clone" aria-hidden="true"></i></button>
+                    </div>
+                    <div class="tg-item">
+                        <a class="tg-link" href="https://t.me/street_eda_bot" target="_blank" rel="noopener">
+                            <span class="tg-ava">s</span>
+                            <span style="min-width:0"><span class="tg-name">@street_eda_bot</span><span class="tg-desc" data-i18n="b2b_food">E-commerce: меню и доставка</span></span>
+                        </a>
+                        <button type="button" class="copy-btn" data-copy="street_eda_bot"><i class="fa-regular fa-clone" aria-hidden="true"></i></button>
+                    </div>
+                    <div class="tg-item">
+                        <a class="tg-link" href="https://t.me/csrouelle_bot" target="_blank" rel="noopener">
+                            <span class="tg-ava">c</span>
+                            <span style="min-width:0"><span class="tg-name">@csrouelle_bot</span><span class="tg-desc" data-i18n="b2b_gaming">Геймификация и расчёт событий</span></span>
+                        </a>
+                        <button type="button" class="copy-btn" data-copy="csrouelle_bot"><i class="fa-regular fa-clone" aria-hidden="true"></i></button>
+                    </div>
+                </div>
+
             </div>
-        </div>
+        </section>
 
-        <!-- Section 3: Telegram Matrix -->
-        <div class="section-label" data-i18n="sec_tg">Telegram Services & Bots</div>
+        <!-- Contact -->
+        <section id="contact" class="cta">
+            <h2 data-i18n-html="cta_title">Есть идея? <em>Давай соберём.</em></h2>
+            <p data-i18n="cta_desc">Пиши в Telegram, отвечаю быстро. Заказная разработка ботов, API и веб-сервисов.</p>
+            <a href="https://t.me/katsyka" target="_blank" rel="noopener" class="btn btn-primary">
+                <i class="fa-brands fa-telegram" aria-hidden="true"></i> t.me/katsyka
+            </a>
+        </section>
 
-        <div class="matrix-grid">
-            
-            <!-- Column 1: Ecosystem -->
-            <div class="matrix-col">
-                <div class="matrix-heading">
-                    <i class="fa-solid fa-layer-group" style="color: var(--accent);"></i>
-                    <span>Compact Network</span>
-                </div>
-
-                <div class="item-row">
-                    <a href="https://t.me/compact_video_bot" target="_blank" style="text-decoration:none; flex:1;">
-                        <span class="item-name">@compact_video_bot</span>
-                        <span class="item-desc" data-i18n="tg_vid">Медиа граббер любого контента</span>
-                    </a>
-                    <button class="copy-btn" data-copy="compact_video_bot"><i class="fa-regular fa-clone"></i></button>
-                </div>
-
-                <div class="item-row">
-                    <a href="https://t.me/compact_music_bot" target="_blank" style="text-decoration:none; flex:1;">
-                        <span class="item-name">@compact_music_bot</span>
-                        <span class="item-desc" data-i18n="tg_mus">Поиск и загрузка аудио 320kbps</span>
-                    </a>
-                    <button class="copy-btn" data-copy="compact_music_bot"><i class="fa-regular fa-clone"></i></button>
-                </div>
-
-                <div class="item-row">
-                    <a href="https://t.me/compact_vpn_bot" target="_blank" style="text-decoration:none; flex:1;">
-                        <span class="item-name">@compact_vpn_bot</span>
-                        <span class="item-desc">VLESS / Shadowsocks туннели</span>
-                    </a>
-                    <button class="copy-btn" data-copy="compact_vpn_bot"><i class="fa-regular fa-clone"></i></button>
-                </div>
-
-                <div class="item-row">
-                    <a href="https://t.me/CompactTelegram" target="_blank" style="text-decoration:none; flex:1;">
-                        <span class="item-name">@CompactTelegram</span>
-                        <span class="item-desc" data-i18n="tg_chan">Анонсы релизов и апдейтов</span>
-                    </a>
-                    <button class="copy-btn" data-copy="CompactTelegram"><i class="fa-regular fa-clone"></i></button>
-                </div>
-            </div>
-
-            <!-- Column 2: Mini Apps -->
-            <div class="matrix-col">
-                <div class="matrix-heading">
-                    <i class="fa-solid fa-code-merge" style="color: #bc13fe;"></i>
-                    <span data-i18n="col_tma">Trackers & Mini Apps</span>
-                </div>
-
-                <div class="item-row">
-                    <a href="https://t.me/ed_concerts_bot" target="_blank" style="text-decoration:none; flex:1;">
-                        <span class="item-name">@ed_concerts_bot</span>
-                        <span class="item-desc" data-i18n="tg_ed">Мониторинг билетов тура Ed Sheeran</span>
-                    </a>
-                    <button class="copy-btn" data-copy="ed_concerts_bot"><i class="fa-regular fa-clone"></i></button>
-                </div>
-
-                <div class="item-row">
-                    <a href="https://t.me/upgradeDemoBot" target="_blank" style="text-decoration:none; flex:1;">
-                        <span class="item-name">@upgradeDemoBot</span>
-                        <span class="item-desc">Interactive TMA Sandbox</span>
-                    </a>
-                    <button class="copy-btn" data-copy="upgradeDemoBot"><i class="fa-regular fa-clone"></i></button>
-                </div>
-
-                <div class="item-row">
-                    <a href="https://t.me/geogur_bot" target="_blank" style="text-decoration:none; flex:1;">
-                        <span class="item-name">@geogur_bot</span>
-                        <span class="item-desc">Location-based WebApp</span>
-                    </a>
-                    <button class="copy-btn" data-copy="geogur_bot"><i class="fa-regular fa-clone"></i></button>
-                </div>
-
-                <div class="item-row">
-                    <a href="https://t.me/giftsearch_robot" target="_blank" style="text-decoration:none; flex:1;">
-                        <span class="item-name">@giftsearch_robot</span>
-                        <span class="item-desc" data-i18n="tg_gifts">Парсинг маркета подарков TG</span>
-                    </a>
-                    <button class="copy-btn" data-copy="giftsearch_robot"><i class="fa-regular fa-clone"></i></button>
-                </div>
-            </div>
-
-            <!-- Column 3: Commercial -->
-            <div class="matrix-col">
-                <div class="matrix-heading">
-                    <i class="fa-solid fa-briefcase" style="color: var(--green);"></i>
-                    <span data-i18n="col_b2b">Commercial Solutions</span>
-                </div>
-
-                <div class="item-row">
-                    <a href="https://t.me/lazer_robbot" target="_blank" style="text-decoration:none; flex:1;">
-                        <span class="item-name">@lazer_robbot</span>
-                        <span class="item-desc" data-i18n="b2b_lazer">Бронирование арены (Мск)</span>
-                    </a>
-                    <button class="copy-btn" data-copy="lazer_robbot"><i class="fa-regular fa-clone"></i></button>
-                </div>
-
-                <div class="item-row">
-                    <a href="https://t.me/UHticketBot" target="_blank" style="text-decoration:none; flex:1;">
-                        <span class="item-name">@UHticketBot</span>
-                        <span class="item-desc" data-i18n="b2b_tickets">Helpdesk & тикет-система</span>
-                    </a>
-                    <button class="copy-btn" data-copy="UHticketBot"><i class="fa-regular fa-clone"></i></button>
-                </div>
-
-                <div class="item-row">
-                    <a href="https://t.me/street_eda_bot" target="_blank" style="text-decoration:none; flex:1;">
-                        <span class="item-name">@street_eda_bot</span>
-                        <span class="item-desc" data-i18n="b2b_food">E-commerce меню и доставка</span>
-                    </a>
-                    <button class="copy-btn" data-copy="street_eda_bot"><i class="fa-regular fa-clone"></i></button>
-                </div>
-
-                <div class="item-row">
-                    <a href="https://t.me/csrouelle_bot" target="_blank" style="text-decoration:none; flex:1;">
-                        <span class="item-name">@csrouelle_bot</span>
-                        <span class="item-desc" data-i18n="b2b_gaming">Геймификация и расчет событий</span>
-                    </a>
-                    <button class="copy-btn" data-copy="csrouelle_bot"><i class="fa-regular fa-clone"></i></button>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Footer -->
         <footer>
-            <div>katsyka // 2026</div>
-            <div style="display: flex; gap: 20px;">
-                <a href="https://t.me/katsyka" target="_blank" style="color: inherit; text-decoration: none;">Direct Contact</a>
-                <span>UTC+3</span>
-            </div>
+            <span>© katsyka · 2026</span>
+            <span><span data-i18n="footer_time">Сейчас в Москве</span> · <span class="clock" id="clock-foot">—</span></span>
         </footer>
 
-    </div>
+    </main>
 
     <script>
-        // --- 1. Canvas Interactive Dynamic Grid ---
-        (function initCanvas() {
-            const canvas = document.getElementById('bg-canvas');
-            const ctx = canvas.getContext('2d');
+        // --- Safe storage (throws in some private / locked-down browsers) ---
+        const store = {
+            get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+            set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } }
+        };
 
-            let width, height;
-            const gap = 38;
-            let mouse = { x: -1000, y: -1000, targetX: -1000, targetY: -1000 };
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-            function resize() {
-                width = canvas.width = window.innerWidth;
-                height = canvas.height = window.innerHeight;
+        // --- i18n ---
+        const dict = {
+            ru: {
+                nav_projects: "Проекты",
+                nav_contact: "Контакт",
+                hero_eyebrow: "Открыт для заказной разработки",
+                hero_title: "Проектирую API, Telegram-экосистемы <em>и независимые веб-сервисы.</em>",
+                hero_desc: "Фокус на отказоустойчивости, минималистичных интерфейсах и чистой клиентской архитектуре. Открытый код и заказной софт.",
+                hero_cta: "Написать в Telegram",
+                hero_more: "Смотреть проекты",
+                stat_web: "веб-проектов",
+                stat_tg: "Telegram-сервисов",
+                stat_time: "Москва, UTC+3",
+                sec_projects: "Проекты",
+                sec_projects_sub: "Веб-сервисы, инфраструктура и эксперименты.",
+                desc_kopro: "Собственная дообученная нейросеть с отдельным приложением и интеграцией множества подключенных сервисов.",
+                kopro_q: "Собери мне пост для канала и запости его в 18:00",
+                kopro_a: "<b>Kopro:</b> готово. Пост в черновиках, публикация запланирована на 18:00.",
+                desc_skebob: "Мой проект Telegram-аватарок: сетка со всеми моими аватарками со Скебобом, и у каждой своя история. Всё это лежит на интерактивной 3D-волне, по которой можно перемещаться и летать.",
+                open_skebob: "Открыть галерею",
+                desc_bleper: "Сайт для просмотра фильмов на торрент-системе. Полностью бесплатно и без регистрации: все фильмы во всех возможных качествах и озвучках.",
+                bleper_free: "Бесплатно",
+                bleper_noreg: "Без регистрации",
+                bleper_dubs: "Все озвучки",
+                bleper_note: "Доступен только по HTTP, по прямому IP-адресу.",
+                open_bleper: "Открыть Bleper",
+                soon: "Скоро",
+                desc_notify: "Надоели @gmail.com и outlook.com? Встречайте name@notify.mom: мой собственный почтовый сервис с мгновенным копированием кодов подтверждения, антиспамом и удобным дашбордом.",
+                inbox_label: "Входящие",
+                mail_login: "Код для входа",
+                mail_verify: "Подтверждение устройства",
+                mail_spam: "Сегодня заблокировано 23 спам-письма",
+                copy_code: "Скопировать код",
+                desc_yukimusic: "Стриминговый веб-клиент без подписок и рекламы. Воспроизведение треков, кэширование метаданных и пользовательские плейлисты прямо в браузере.",
+                open_player: "Веб-плеер",
+                desc_yukichat: "Легковесный мессенджер с P2P-видеокомнатами через WebRTC. Не требует установки нативных клиентов.",
+                open_chat: "Веб-чат",
+                desc_vps: "Виртуальные серверы на Tier-3 площадках со сквозным биллингом собственной разработки и автоматическим деплоем инстансов.",
+                vps_sla: "Доступность",
+                vps_billing: "Биллинг",
+                vps_billing_val: "Свой",
+                desc_ishe: "Публичный JSON-эндпоинт для быстрой проверки статуса публичных личностей в автоматизированных пайплайнах.",
+                api_title: "живой запрос",
+                api_input: "Имя для проверки",
+                api_send: "Отправить",
+                api_idle: "// нажми «Отправить», чтобы сделать живой запрос",
+                api_error: "// запрос не удался: API недоступен или не разрешает запросы из браузера (CORS)",
+                api_empty: "// пустой ответ",
+                sec_tg: "Telegram-сервисы и боты",
+                sec_tg_sub: "Боты, мини-приложения и коммерческие решения.",
+                col_tma: "Трекеры и Mini Apps",
+                col_b2b: "Коммерческая разработка",
+                tg_vid: "Медиа-граббер любого контента",
+                tg_mus: "Поиск и загрузка аудио 320 kbps",
+                tg_vpn: "Туннели VLESS / Shadowsocks",
+                tg_chan: "Анонсы релизов и обновлений",
+                tg_ed: "Мониторинг билетов тура Ed Sheeran",
+                tg_upgrade: "Интерактивная песочница TMA",
+                tg_geo: "Геолокационное веб-приложение",
+                tg_gifts: "Парсинг маркета подарков Telegram",
+                b2b_lazer: "Бронирование лазертаг-арены (Мск)",
+                b2b_tickets: "Helpdesk и тикет-система",
+                b2b_food: "E-commerce: меню и доставка",
+                b2b_gaming: "Геймификация и расчёт событий",
+                cta_title: "Есть идея? <em>Давай соберём.</em>",
+                cta_desc: "Пиши в Telegram, отвечаю быстро. Заказная разработка ботов, API и веб-сервисов.",
+                footer_time: "Сейчас в Москве",
+                copy_link: "Скопировать ссылку"
+            },
+            en: {
+                nav_projects: "Projects",
+                nav_contact: "Contact",
+                hero_eyebrow: "Open for contract work",
+                hero_title: "I build APIs, Telegram ecosystems <em>and independent web services.</em>",
+                hero_desc: "Focused on high availability, minimal interfaces and clean client-side architecture. Open source and contract engineering.",
+                hero_cta: "Message on Telegram",
+                hero_more: "See projects",
+                stat_web: "web projects",
+                stat_tg: "Telegram services",
+                stat_time: "Moscow, UTC+3",
+                sec_projects: "Projects",
+                sec_projects_sub: "Web services, infrastructure and experiments.",
+                desc_kopro: "A custom fine-tuned AI with its own app and integrations with many connected services.",
+                kopro_q: "Draft a post for my channel and publish it at 6 pm",
+                kopro_a: "<b>Kopro:</b> done. The post is in drafts and scheduled for 18:00.",
+                desc_skebob: "My Telegram avatars project: a grid of every avatar I've made with Skebob, each with its own story. They sit on an interactive 3D wave you can move across and fly around.",
+                open_skebob: "Open gallery",
+                desc_bleper: "A movie-watching site powered by a torrent system. Completely free with no registration: every movie in every available quality and dub.",
+                bleper_free: "Free",
+                bleper_noreg: "No sign-up",
+                bleper_dubs: "All dubs",
+                bleper_note: "Available only over HTTP, via a direct IP address.",
+                open_bleper: "Open Bleper",
+                soon: "Coming soon",
+                desc_notify: "Tired of @gmail.com and outlook.com? Meet name@notify.mom: my own inbox service with instant copying of verification codes, anti-spam and a comfortable dashboard.",
+                inbox_label: "Inbox",
+                mail_login: "Your login code",
+                mail_verify: "Verify your device",
+                mail_spam: "23 spam emails blocked today",
+                copy_code: "Copy code",
+                desc_yukimusic: "A subscription-free, ad-free streaming web client. Instant playback, metadata caching and custom playlists right in the browser.",
+                open_player: "Web player",
+                desc_yukichat: "A lightweight messenger with P2P video rooms over WebRTC. No native app to install.",
+                open_chat: "Web chat",
+                desc_vps: "Virtual servers in Tier-3 data centers with an in-house billing system and automated instance provisioning.",
+                vps_sla: "Availability",
+                vps_billing: "Billing",
+                vps_billing_val: "In-house",
+                desc_ishe: "A public JSON endpoint for quickly checking the status of public figures in automated pipelines.",
+                api_title: "live request",
+                api_input: "Name to check",
+                api_send: "Send",
+                api_idle: "// press Send to make a live request",
+                api_error: "// request failed: the API is unreachable or doesn't allow browser requests (CORS)",
+                api_empty: "// empty response",
+                sec_tg: "Telegram services & bots",
+                sec_tg_sub: "Bots, mini apps and commercial work.",
+                col_tma: "Trackers & Mini Apps",
+                col_b2b: "Commercial work",
+                tg_vid: "Multi-platform media downloader",
+                tg_mus: "High-quality 320 kbps audio finder",
+                tg_vpn: "VLESS / Shadowsocks tunnels",
+                tg_chan: "Release notes & updates",
+                tg_ed: "Ed Sheeran tour ticket radar",
+                tg_upgrade: "Interactive TMA sandbox",
+                tg_geo: "Location-based web app",
+                tg_gifts: "Telegram gift market analytics",
+                b2b_lazer: "Laser tag arena booking (Moscow)",
+                b2b_tickets: "Support desk ticket bot",
+                b2b_food: "Menu catalog & delivery bot",
+                b2b_gaming: "Gamification & event odds",
+                cta_title: "Got an idea? <em>Let's build it.</em>",
+                cta_desc: "Message me on Telegram, I reply fast. Contract work on bots, APIs and web services.",
+                footer_time: "Local time in Moscow",
+                copy_link: "Copy link"
             }
-            window.addEventListener('resize', resize);
-            resize();
+        };
 
-            window.addEventListener('mousemove', (e) => {
-                mouse.targetX = e.clientX;
-                mouse.targetY = e.clientY;
-            });
+        let lang = store.get('site_lang') === 'en' ? 'en' : 'ru';
+        const t = (k) => dict[lang][k] ?? dict.ru[k] ?? k;
 
-            window.addEventListener('mouseleave', () => {
-                mouse.targetX = -1000;
-                mouse.targetY = -1000;
-            });
+        function applyLang(next) {
+            lang = next;
+            store.set('site_lang', next);
+            document.documentElement.lang = next;
+            document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+            document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
+            document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+            document.querySelectorAll('.copy-btn').forEach(el => { el.setAttribute('aria-label', `${t('copy_link')}: @${el.dataset.copy}`); });
+            document.querySelectorAll('.lang button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === next)));
+        }
 
-            function render() {
-                mouse.x += (mouse.targetX - mouse.x) * 0.12;
-                mouse.y += (mouse.targetY - mouse.y) * 0.12;
+        document.querySelectorAll('.lang button').forEach(b => b.addEventListener('click', () => applyLang(b.dataset.lang)));
+        applyLang(lang);
 
-                ctx.clearRect(0, 0, width, height);
+        // --- Counters ---
+        document.getElementById('stat-web').textContent = document.querySelectorAll('.project').length;
+        document.getElementById('stat-tg').textContent = document.querySelectorAll('.tg-item').length;
 
-                const cols = Math.ceil(width / gap);
-                const rows = Math.ceil(height / gap);
-
-                for (let i = 0; i <= cols; i++) {
-                    for (let j = 0; j <= rows; j++) {
-                        const x = i * gap;
-                        const y = j * gap;
-
-                        const dx = mouse.x - x;
-                        const dy = mouse.y - y;
-                        const distSq = dx * dx + dy * dy;
-                        const radius = 180;
-                        const radiusSq = radius * radius;
-
-                        let alpha = 0.035;
-                        let size = 1;
-
-                        if (distSq < radiusSq) {
-                            const factor = 1 - (distSq / radiusSq);
-                            alpha = 0.035 + factor * 0.45;
-                            size = 1 + factor * 2;
-                        }
-
-                        ctx.fillStyle = `rgba(0, 240, 255, ${alpha})`;
-                        ctx.fillRect(x - size/2, y - size/2, size, size);
-                    }
-                }
-
-                requestAnimationFrame(render);
-            }
-            render();
+        // --- Moscow clock ---
+        (function initClock() {
+            let fmt;
+            try {
+                fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Moscow', hour: '2-digit', minute: '2-digit', hour12: false });
+            } catch (e) { return; }
+            const els = [document.getElementById('clock'), document.getElementById('clock-foot')];
+            const tick = () => { const s = fmt.format(new Date()); els.forEach(el => { el.textContent = s; }); };
+            tick();
+            setInterval(tick, 15000);
         })();
 
-        // --- 2. Live API Benchmarker ---
-        (function initApi() {
-            const input = document.getElementById('api-query');
-            const btn = document.getElementById('run-api');
-            const out = document.getElementById('api-text');
-            const rtt = document.getElementById('api-rtt');
-
-            async function query() {
-                const val = input.value.trim();
-                if (!val) return;
-
-                out.textContent = `GET https://ishe.monster/api/v1?name=${encodeURIComponent(val)}...`;
-                rtt.textContent = '...';
-
-                const start = performance.now();
-                try {
-                    const res = await fetch(`https://ishe.monster/api/v1?name=${encodeURIComponent(val)}`);
-                    const elapsed = Math.round(performance.now() - start);
-                    const data = await res.json();
-                    out.textContent = JSON.stringify(data);
-                    rtt.textContent = `${elapsed}ms [${res.status}]`;
-                } catch (e) {
-                    const elapsed = Math.round(performance.now() - start);
-                    out.textContent = JSON.stringify({ query: val, status: "alive", notice: "cached client-side" });
-                    rtt.textContent = `${elapsed}ms [mock/cors]`;
-                }
-            }
-
-            btn.addEventListener('click', query);
-            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') query(); });
-        })();
-
-        // --- 3. Fast Copy Buttons ---
-        document.querySelectorAll('.copy-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const handle = btn.dataset.copy;
-                navigator.clipboard.writeText(`https://t.me/${handle}`).then(() => {
-                    const prev = btn.innerHTML;
-                    btn.innerHTML = '<i class="fa-solid fa-check" style="color:var(--green)"></i>';
-                    setTimeout(() => btn.innerHTML = prev, 1200);
+        // --- Background spotlight + card glow (pointer only, rAF-throttled) ---
+        (function initPointer() {
+            if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+            const root = document.documentElement;
+            let px = 0, py = 0, queued = false;
+            window.addEventListener('pointermove', (e) => {
+                px = e.clientX; py = e.clientY;
+                if (queued) return;
+                queued = true;
+                requestAnimationFrame(() => {
+                    queued = false;
+                    root.style.setProperty('--mx', px + 'px');
+                    root.style.setProperty('--my', py + 'px');
                 });
+            }, { passive: true });
+            document.addEventListener('pointerleave', () => {
+                root.style.setProperty('--mx', '-999px');
+                root.style.setProperty('--my', '-999px');
+            });
+            document.querySelectorAll('.card').forEach(card => {
+                card.addEventListener('pointermove', (e) => {
+                    const r = card.getBoundingClientRect();
+                    card.style.setProperty('--x', (e.clientX - r.left) + 'px');
+                    card.style.setProperty('--y', (e.clientY - r.top) + 'px');
+                });
+            });
+        })();
+
+        // --- Copy helpers ---
+        function copyText(text) {
+            if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
+            return new Promise((resolve, reject) => {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.setAttribute('readonly', '');
+                ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy') ? resolve() : reject(new Error('copy failed')); }
+                catch (e) { reject(e); }
+                finally { ta.remove(); }
+            });
+        }
+
+        function flash(btn, ok) {
+            if (!btn.dataset.html) btn.dataset.html = btn.innerHTML;
+            clearTimeout(btn._timer);
+            btn.classList.remove('is-done', 'is-failed');
+            btn.classList.add(ok ? 'is-done' : 'is-failed');
+            const icon = `<i class="fa-solid ${ok ? 'fa-check' : 'fa-xmark'}" aria-hidden="true"></i>`;
+            btn.innerHTML = btn.classList.contains('otp') ? btn.dataset.html.replace(/<i[^>]*><\/i>/, icon) : icon;
+            btn._timer = setTimeout(() => {
+                btn.innerHTML = btn.dataset.html;
+                btn.classList.remove('is-done', 'is-failed');
+            }, 1200);
+        }
+
+        document.querySelectorAll('[data-copy], [data-copy-raw]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const text = btn.dataset.copyRaw ?? `https://t.me/${btn.dataset.copy}`;
+                copyText(text).then(() => flash(btn, true), () => flash(btn, false));
             });
         });
 
-        // --- 4. Bilingual System ---
-        (function initLang() {
-            const dict = {
-                ru: {
-                    hero_title: "Проектирую API, Telegram-экосистемы <span>и независимые веб-сервисы.</span>",
-                    hero_desc: "Фокус на отказоустойчивости, минималистичных интерфейсах и чистой клиентской архитектуре. Открытый код + заказной софт.",
-                    sec_core: "Ключевые веб-проекты",
-                    desc_kopro: "Собственная дообученная нейросеть с отдельным приложением и интеграцией множества подключенных сервисов.",
-                    desc_yukimusic: "Стриминговый веб-клиент без подписок и рекламы. Воспроизведение треков, кэширование метаданных и поддержка пользовательских плейлистов прямо в браузере.",
-                    desc_yukichat: "Легковесный мессенджер с поддержкой P2P видеокомнат через WebRTC. Не требует установки нативных клиентов.",
-                    desc_vps: "Виртуальные серверы на базе Tier-3 площадок со сквозным биллингом собственной разработки и автоматизированным деплоем инстансов.",
-                    desc_ishe: "Публичный JSON эндпоинт для экспресс-проверки статуса публичных личностей в автоматизированных пайплайнах.",
-                    sec_tg: "Telegram-сервисы и инфраструктура",
-                    tg_vid: "Медиа граббер любого контента",
-                    tg_mus: "Поиск и загрузка аудио 320kbps",
-                    tg_chan: "Анонсы релизов и апдейтов",
-                    col_tma: "Трекеры & Mini Apps",
-                    tg_ed: "Мониторинг билетов тура Ed Sheeran",
-                    tg_gifts: "Парсинг маркета подарков TG",
-                    col_b2b: "Коммерческая разработка",
-                    b2b_lazer: "Бронирование арены (Мск)",
-                    b2b_tickets: "Helpdesk & тикет-система",
-                    b2b_food: "E-commerce меню и доставка",
-                    b2b_gaming: "Геймификация и расчет событий"
-                },
-                en: {
-                    hero_title: "Engineering robust APIs, Telegram ecosystems <span>and open web tools.</span>",
-                    hero_desc: "Focusing on high availability, raw interface performance, and clean client-side architectures. Open source & contract engineering.",
-                    sec_core: "Featured Web Engines",
-                    desc_kopro: "Self fine tuned ai with own app, with many connected apps integration.",
-                    desc_yukimusic: "Subscription-free web streaming client. Instant playback, metadata caching, and client-side playlist management directly in browser.",
-                    desc_yukichat: "Zero-dependency messenger featuring P2P video calls via WebRTC. No desktop installation needed.",
-                    desc_vps: "Tier-3 cloud infrastructure powered by custom automated billing mechanics and instant node provisioning.",
-                    desc_ishe: "Public JSON status endpoint to check public figures in automated pipelines.",
-                    sec_tg: "Telegram Bots & Core Fleet",
-                    tg_vid: "Multi-platform media scraper",
-                    tg_mus: "Lossless 320kbps audio finder",
-                    tg_chan: "Release logs & changelog",
-                    col_tma: "Trackers & Mini Apps",
-                    tg_ed: "Ed Sheeran tour ticket radar",
-                    tg_gifts: "TG gift market analytics",
-                    col_b2b: "B2B & Contract Works",
-                    b2b_lazer: "Laser tag booking engine (Msk)",
-                    b2b_tickets: "Support desk ticket bot",
-                    b2b_food: "Menu catalog & checkout bot",
-                    b2b_gaming: "Game odds & event calc"
+        // --- ishe.monster live request (shows the real response or the real error) ---
+        (function initApi() {
+            const form = document.getElementById('api-form');
+            const input = document.getElementById('api-query');
+            const btn = document.getElementById('run-api');
+            const out = document.getElementById('api-out');
+            const urlEl = document.getElementById('api-url');
+            const rtt = document.getElementById('api-rtt');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const val = input.value.trim();
+                if (!val || btn.disabled) return;
+
+                const url = `https://ishe.monster/api/v1?name=${encodeURIComponent(val)}`;
+                out.removeAttribute('data-i18n');
+                out.className = 'term-out';
+                out.textContent = `> GET ${url}`;
+                urlEl.textContent = url.replace('https://', '');
+                rtt.textContent = '…';
+                btn.disabled = true;
+
+                const start = performance.now();
+                try {
+                    const res = await fetch(url, { headers: { Accept: 'application/json' } });
+                    const body = await res.text();
+                    const ms = Math.round(performance.now() - start);
+                    let shown;
+                    try { shown = JSON.stringify(JSON.parse(body), null, 2); }
+                    catch (err) { shown = body.trim().slice(0, 800) || t('api_empty'); }
+                    out.textContent = shown;
+                    out.classList.add(res.ok ? 'is-ok' : 'is-error');
+                    rtt.textContent = `${ms}ms · HTTP ${res.status}`;
+                } catch (err) {
+                    const ms = Math.round(performance.now() - start);
+                    out.textContent = t('api_error');
+                    out.classList.add('is-error');
+                    rtt.textContent = `${ms}ms · failed`;
+                } finally {
+                    btn.disabled = false;
                 }
-            };
+            });
+        })();
 
-            let current = localStorage.getItem('site_lang') || 'ru';
-            const btn = document.getElementById('lang-btn');
+        // --- Skebob 3D wave preview ---
+        (function initWave() {
+            const canvas = document.getElementById('skebob-wave');
+            const ctx = canvas.getContext('2d');
+            const COLS = 30, ROWS = 16;
+            let w = 0, h = 0, dpr = 1, running = false, visible = false;
+            let camX = 0, camTarget = 0, drag = null;
 
-            function apply(lang) {
-                current = lang;
-                localStorage.setItem('site_lang', lang);
-                btn.textContent = lang === 'ru' ? 'RU / EN' : 'EN / RU';
-                document.querySelectorAll('[data-i18n]').forEach(el => {
-                    const k = el.dataset.i18n;
-                    if (dict[lang][k]) el.innerHTML = dict[lang][k];
-                });
+            function resize() {
+                dpr = Math.min(window.devicePixelRatio || 1, 2);
+                w = canvas.clientWidth; h = canvas.clientHeight;
+                canvas.width = Math.round(w * dpr);
+                canvas.height = Math.round(h * dpr);
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             }
 
-            btn.addEventListener('click', () => apply(current === 'ru' ? 'en' : 'ru'));
-            apply(current);
+            function draw(time) {
+                const tt = time / 1000;
+                camX += (camTarget - camX) * 0.08;
+                ctx.clearRect(0, 0, w, h);
+                const f = h * 1.25;
+                const horizon = h * 0.12;
+                const color = getComputedStyle(canvas.closest('.card')).getPropertyValue('--c').trim() || '#ff7ab6';
+                ctx.fillStyle = color;
+                for (let r = ROWS - 1; r >= 0; r--) {
+                    const z = 1 + r * (3 / ROWS);
+                    for (let c = 0; c < COLS; c++) {
+                        const x = (c / (COLS - 1) - 0.5) * 3.6 * (w / Math.max(h, 1)) * 0.5 + camX;
+                        const y = 0.6 - (Math.sin(x * 2.1 + tt * 1.2) + Math.sin(z * 2.4 - tt * 1.5)) * 0.09;
+                        const sx = w / 2 + (x - camX * 1.6) / z * f;
+                        const sy = horizon + y / z * f;
+                        if (sx < -4 || sx > w + 4) continue;
+                        ctx.globalAlpha = Math.max(0.08, 1 - (z - 1) / 3.2);
+                        const s = 2.6 / z;
+                        ctx.fillRect(sx - s / 2, sy - s / 2, s, s);
+                    }
+                }
+                ctx.globalAlpha = 1;
+            }
+
+            function loop(time) {
+                if (!running) return;
+                draw(time);
+                requestAnimationFrame(loop);
+            }
+
+            function setRunning(on) {
+                if (reduceMotion) { draw(0); return; }
+                if (on === running) return;
+                running = on;
+                if (on) requestAnimationFrame(loop);
+            }
+
+            canvas.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, cam: camTarget }; canvas.setPointerCapture(e.pointerId); canvas.style.cursor = 'grabbing'; });
+            canvas.addEventListener('pointermove', (e) => {
+                if (drag) camTarget = drag.cam - (e.clientX - drag.x) / w * 2;
+                else if (e.pointerType === 'mouse') camTarget = (e.offsetX / w - 0.5) * 0.6;
+            });
+            const endDrag = () => { drag = null; canvas.style.cursor = ''; };
+            canvas.addEventListener('pointerup', endDrag);
+            canvas.addEventListener('pointercancel', endDrag);
+
+            new ResizeObserver(() => { resize(); if (!running) draw(performance.now()); }).observe(canvas);
+            new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; setRunning(visible && !document.hidden); }).observe(canvas);
+            document.addEventListener('visibilitychange', () => setRunning(visible && !document.hidden));
+            resize();
+            draw(0);
         })();
     </script>
 </body>
